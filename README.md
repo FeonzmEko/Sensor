@@ -37,7 +37,7 @@
 
 | 实时波形 + 双传感器采集 | Hello World 最小示例 |
 |:---:|:---:|
-| ![实时波形](docs/evidence/task3-short-test/task3-short-test-running.png) | ![Hello World](docs/evidence/sensor-hello-world-real-device.png) |
+| ![实时波形](docs\evidence\af4bdcd0391833fc497854ae248f23f0.jpg) | ![Hello World](docs/evidence/sensor-hello-world-real-device.png) |
 
 > 真机实测：加速度计约 `115 Hz`、陀螺仪约 `46 Hz`（`SENSOR_DELAY_GAME` 档位下的实测值）。
 
