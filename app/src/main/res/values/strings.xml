@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">SensorLog</string>
+    <string name="hello_world_title">Sensor Hello World</string>
+    <string name="hello_world_open">打开二十行 Hello World</string>
+</resources>

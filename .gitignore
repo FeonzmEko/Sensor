@@ -1,0 +1,21 @@
+# --- Gradle / Android build output ---
+.gradle
+/build
+/captures
+.externalNativeBuild
+.cxx
+.kotlin
+
+# --- Android Studio / IDE ---
+*.iml
+.idea/
+.DS_Store
+
+# --- Local config (per-machine, never commit) ---
+local.properties
+/local.properties
+
+# --- Local scratch / tooling (not part of the app) ---
+/tmp
+*.apk
+*.aab
