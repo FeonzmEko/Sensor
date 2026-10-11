@@ -82,6 +82,12 @@ def _clean(values: np.ndarray) -> np.ndarray:
     return values[np.isfinite(values)]
 
 
+def _clean_pair(ratio: np.ndarray, cv: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    """成对清洗 R 与 CV，避免分别剔除 NaN 后两个数组长度不一致。"""
+    mask = np.isfinite(ratio) & np.isfinite(cv)
+    return ratio[mask], cv[mask]
+
+
 def run_bus_experiment(
     session: SensorSession,
     out_dir: str | Path,
@@ -98,13 +104,11 @@ def run_bus_experiment(
     walk_ratio, walk_cv = window_feature_pairs(
         stream.magnitude(), fs, window_seconds, step_seconds
     )
-    walk_ratio = _clean(walk_ratio)
-    walk_cv = _clean(walk_cv)
+    walk_ratio, walk_cv = _clean_pair(walk_ratio, walk_cv)
 
     bus_signal = simulate_bus_vibration(fs=fs, duration_seconds=max(60.0, window_seconds * 20))
     bus_ratio, bus_cv = window_feature_pairs(bus_signal, fs, window_seconds, step_seconds)
-    bus_ratio = _clean(bus_ratio)
-    bus_cv = _clean(bus_cv)
+    bus_ratio, bus_cv = _clean_pair(bus_ratio, bus_cv)
 
     def classify(ratio: np.ndarray, cv: np.ndarray) -> np.ndarray:
         # CV 缺失时只依赖能量占比，避免把 NaN 直接判成步行。

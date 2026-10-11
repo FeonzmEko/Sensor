@@ -1,0 +1,73 @@
+{
+  "schema_version": 2,
+  "session_id": "20261011_093758_739",
+  "status": "completed",
+  "stop_reason": "2 分钟真机冒烟完成",
+  "experiment": "lesson2-feature-engineering",
+  "app_version": "1.0",
+  "route_name": "instrumented-2min-smoke",
+  "device_placement": "手持",
+  "orientation": "屏幕朝上平放",
+  "target_duration_seconds": 120,
+  "note": "2 分钟带标签真机冒烟",
+  "started_at": "2026-10-11 09:37:58.741 +0800",
+  "ended_at": "2026-10-11 09:40:19.723 +0800",
+  "started_elapsed_realtime_ns": 758454986775433,
+  "ended_elapsed_realtime_ns": 758595968578608,
+  "sample_clock": "SensorEvent.timestamp, nanoseconds, same boot-time clock for both sensors",
+  "coordinate_system": "Android device body frame X\/Y\/Z",
+  "device": {
+    "manufacturer": "Xiaomi",
+    "model": "25019PNF3C",
+    "device": "xuanyuan",
+    "android_release": "17",
+    "android_sdk": 37
+  },
+  "sensors": {
+    "accelerometer": {
+      "name": "lsm6dsv Accelerometer Non-wakeup",
+      "vendor": "STMicro",
+      "version": 28676,
+      "type": 1,
+      "max_range": 156.9064,
+      "resolution": 0.0047856453,
+      "min_delay_us": 5000,
+      "reporting_mode": 0
+    },
+    "gyroscope": {
+      "name": "lsm6dsv Gyroscope Non-wakeup",
+      "vendor": "STMicro",
+      "version": 28676,
+      "type": 4,
+      "max_range": 34.906036,
+      "resolution": 0.0012217296,
+      "min_delay_us": 5000,
+      "reporting_mode": 0
+    }
+  },
+  "samples": {
+    "accelerometer": {
+      "unit": "m\/s^2",
+      "sample_count": 13664,
+      "first_timestamp_ns": 758454996491128,
+      "last_timestamp_ns": 758595938799966,
+      "duration_seconds": 140.942308838,
+      "measured_hz": 96.94037306927007
+    },
+    "gyroscope": {
+      "unit": "rad\/s",
+      "sample_count": 5464,
+      "first_timestamp_ns": 758455006853419,
+      "last_timestamp_ns": 758595944815851,
+      "duration_seconds": 140.937962432,
+      "measured_hz": 38.76173534604488
+    }
+  },
+  "labels": {
+    "file": "labels.csv",
+    "header": "timestamp_elapsed_ns,wall_time_epoch_ms,label",
+    "count": 4,
+    "clock": "timestamp_elapsed_ns uses SystemClock.elapsedRealtimeNanos(), the same boot-time clock as SensorEvent.timestamp"
+  },
+  "error": null
+}

@@ -1,0 +1,10 @@
+﻿record_type,state,start_seconds,end_seconds,start_elapsed_ns,end_elapsed_ns,source
+raw_event,开始步行,26.965604451,26.965604451,,,labels.csv
+raw_event,上车,63.968165062,63.968165062,,,labels.csv
+raw_event,下车,98.968618486,98.968618486,,,labels.csv
+raw_event,到达,128.969136287,128.969136287,,,labels.csv
+inferred_interval,unknown,0.0,26.965604451,758454996491128,758481962095579,unknown
+inferred_interval,开始步行,26.965604451,63.968165062,758481962095579,758518964656190,inferred_between_events
+inferred_interval,上车,63.968165062,98.968618486,758518964656190,758553965109614,inferred_between_events
+inferred_interval,下车,98.968618486,128.969136287,758553965109614,758583965627415,inferred_between_events
+inferred_interval,到达,128.969136287,140.942308838,758583965627415,758595938799966,inferred_between_events

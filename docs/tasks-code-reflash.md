@@ -6,6 +6,8 @@
 >
 > 核心原则：Android App 只负责稳定采集和打标签，PC 端 Python 工程负责质量检查、滑窗、时域特征、频域特征、实验和报告。
 
+> 状态说明：`[x]` 表示已完成；`[ ]` 表示未完成或仍需真机/人工执行。本表依据仓库代码、生成的 Debug APK、Python 分析产物与真机仪器化调试结果判断；真机为 Xiaomi 25019PNF3C（Android 17 / SDK 37，序列号 a1d42191）。
+
 ## 1. 当前代码与数据基线
 
 - [x] 现有 App 可同步注册加速度计与陀螺仪。
@@ -16,8 +18,8 @@
 - [x] 571.3 秒数据可作为算法调试和 FFT 链路验证样本。
 - [ ] 571.3 秒数据不能替代第 2 次课要求的约 20 分钟混合状态数据。
 - [ ] 当前数据未记录明确路线、持握方式、朝向和事件标签。
-- [ ] 当前仓库没有独立的 Python 特征工程分析工程。
-- [ ] 当前仓库没有窗口级特征表、FFT 结果、D06/D07 记录和公交误计步分析。
+- [x] 当前仓库没有独立的 Python 特征工程分析工程。
+- [x] 当前仓库没有窗口级特征表、FFT 结果、D06/D07 记录和公交误计步分析。
 
 ### 1.1 当前数据适用范围
 
@@ -58,215 +60,219 @@ Sensor/
 
 ### 3.1 保留不改
 
-- [ ] 保留 `app/src/main/java/com/example/sensorlog/WaveformView.kt`。
+- [x] 保留 `app/src/main/java/com/example/sensorlog/WaveformView.kt`。
+> 注：用户明确要求删除“打开二十行 Hello World”模块，因此下面两项保留要求未执行，已改为删除 Activity、布局、入口按钮、字符串与清单声明。
+
 - [ ] 保留 `app/src/main/java/com/example/sensorlog/HelloWorldActivity.kt`。
 - [ ] 保留 `app/src/main/res/layout/activity_hello_world.xml`。
-- [ ] 保留 `app/src/main/AndroidManifest.xml` 的现有前台采集模式。
-- [ ] 保留 `docs/tasks.md` 作为第 1 次课任务记录。
-- [ ] 保留 `docs/task2-verification.md`、`docs/task3-short-test.md`、`docs/task3-verification.md`。
-- [ ] 保留 `data/task3`，作为第 1 次课交付和 Python 冒烟测试输入。
-- [ ] 保留原始 CSV，不覆盖、不修改、不在原文件上插值或滤波。
+- [x] 保留 `app/src/main/AndroidManifest.xml` 的现有前台采集模式。
+- [x] 保留 `docs/tasks.md` 作为第 1 次课任务记录。
+- [x] 保留 `docs/task2-verification.md`、`docs/task3-short-test.md`、`docs/task3-verification.md`。
+- [x] 保留 `data/task3`，作为第 1 次课交付和 Python 冒烟测试输入。
+- [x] 保留原始 CSV，不覆盖、不修改、不在原文件上插值或滤波。
 
 ### 3.2 后续需要修改的工程文件
 
-- [ ] `app/src/main/java/com/example/sensorlog/MainActivity.kt`
-  - [ ] 增加采集配置读取。
-  - [ ] 增加 20 分钟倒计时或已采集时长显示。
-  - [ ] 增加事件打点入口。
-  - [ ] 增加采集会话的运行状态和标签反馈。
-  - [ ] 保留现有实时波形和 `onPause()` 停止逻辑。
-- [ ] `app/src/main/java/com/example/sensorlog/SensorSessionRecorder.kt`
-  - [ ] 增加 `SessionConfig` 或等价配置对象。
-  - [ ] 增加 `route_name`、`device_placement`、`orientation` 元数据。
-  - [ ] 增加 `app_version` 和 `target_duration_seconds` 元数据。
-  - [ ] 增加 `labels.csv` 写入能力。
-  - [ ] 增加 `markEvent(label)` 或等价事件记录接口。
-  - [ ] 保持原始传感器 CSV 的列名和精度。
-- [ ] `app/src/main/res/layout/activity_main.xml`
-  - [ ] 增加路线名称输入。
-  - [ ] 增加手机位置和朝向输入。
-  - [ ] 增加事件打点按钮。
-  - [ ] 增加采集时长和事件状态显示。
-- [ ] `app/src/main/res/values/strings.xml`
-  - [ ] 增加新增控件对应的字符串资源。
-- [ ] `.gitignore`
-  - [ ] 忽略 Python 虚拟环境。
-  - [ ] 忽略原始数据、派生结果、缓存和临时文件。
-  - [ ] 不忽略最终报告、关键图表和必要的校验文件。
-- [ ] `README.md`
-  - [ ] 增加 Python 分析工程的运行方法。
-  - [ ] 增加 20 分钟数据采集协议。
-  - [ ] 增加最终输出目录说明。
+- [x] `app/src/main/java/com/example/sensorlog/MainActivity.kt`
+  - [x] 增加采集配置读取。
+  - [x] 增加 20 分钟倒计时或已采集时长显示。
+  - [x] 增加事件打点入口。
+  - [x] 增加采集会话的运行状态和标签反馈。
+  - [x] 保留现有实时波形和 `onPause()` 停止逻辑。
+- [x] `app/src/main/java/com/example/sensorlog/SensorSessionRecorder.kt`
+  - [x] 增加 `SessionConfig` 或等价配置对象。
+  - [x] 增加 `route_name`、`device_placement`、`orientation` 元数据。
+  - [x] 增加 `app_version` 和 `target_duration_seconds` 元数据。
+  - [x] 增加 `labels.csv` 写入能力。
+  - [x] 增加 `markEvent(label)` 或等价事件记录接口。
+  - [x] 保持原始传感器 CSV 的列名和精度。
+- [x] `app/src/main/res/layout/activity_main.xml`
+  - [x] 增加路线名称输入。
+  - [x] 增加手机位置和朝向输入。
+  - [x] 增加事件打点按钮。
+  - [x] 增加采集时长和事件状态显示。
+- [x] `app/src/main/res/values/strings.xml`
+  - [x] 增加新增控件对应的字符串资源。
+- [x] `.gitignore`
+  - [x] 忽略 Python 虚拟环境。
+  - [x] 忽略原始数据、派生结果、缓存和临时文件。
+  - [x] 不忽略最终报告、关键图表和必要的校验文件。
+- [x] `README.md`
+  - [x] 增加 Python 分析工程的运行方法。
+  - [x] 增加 20 分钟数据采集协议。
+  - [x] 增加最终输出目录说明。
 
 ### 3.3 后续需要新增的文件
 
-- [ ] `analysis/pyproject.toml`
-- [ ] `analysis/README.md`
-- [ ] `analysis/src/sensor_analysis/__init__.py`
-- [ ] `analysis/src/sensor_analysis/session.py`
-- [ ] `analysis/src/sensor_analysis/quality.py`
-- [ ] `analysis/src/sensor_analysis/windows.py`
-- [ ] `analysis/src/sensor_analysis/features_time.py`
-- [ ] `analysis/src/sensor_analysis/features_freq.py`
-- [ ] `analysis/src/sensor_analysis/experiment_d06.py`
-- [ ] `analysis/src/sensor_analysis/experiment_d07.py`
-- [ ] `analysis/src/sensor_analysis/bus_false_step.py`
-- [ ] `analysis/src/sensor_analysis/pipeline.py`
-- [ ] `analysis/src/sensor_analysis/plotting.py`
-- [ ] `analysis/tests/test_time_features.py`
-- [ ] `analysis/tests/test_frequency_features.py`
-- [ ] `docs/experiment2-report.md`
+- [x] `analysis/pyproject.toml`
+- [x] `analysis/README.md`
+- [x] `analysis/src/sensor_analysis/__init__.py`
+- [x] `analysis/src/sensor_analysis/session.py`
+- [x] `analysis/src/sensor_analysis/quality.py`
+- [x] `analysis/src/sensor_analysis/windows.py`
+- [x] `analysis/src/sensor_analysis/features_time.py`
+- [x] `analysis/src/sensor_analysis/features_freq.py`
+- [x] `analysis/src/sensor_analysis/experiment_d06.py`
+- [x] `analysis/src/sensor_analysis/experiment_d07.py`
+- [x] `analysis/src/sensor_analysis/bus_false_step.py`
+- [x] `analysis/src/sensor_analysis/pipeline.py`
+- [x] `analysis/src/sensor_analysis/plotting.py`
+- [x] `analysis/tests/test_time_features.py`
+- [x] `analysis/tests/test_frequency_features.py`
+- [x] `docs/experiment2-report.md`
 
 ### 3.4 可删除或清理的内容
 
-- [ ] 删除根目录 0 字节误生成文件 `当前状态：2026-10-08`。
-- [ ] 删除根目录 0 字节误生成文件 `当前状态：双传感器同步采集器已实现，并完成`。
-- [ ] 可选：删除未使用的 `navigation-fragment-ktx` 依赖。
-- [ ] 可选：删除未使用的 `navigation-ui-ktx` 依赖。
+- [x] 删除根目录 0 字节误生成文件 `当前状态：2026-10-08`。
+- [x] 删除根目录 0 字节误生成文件 `当前状态：双传感器同步采集器已实现，并完成`。
+- [x] 可选：删除未使用的 `navigation-fragment-ktx` 依赖。
+- [x] 可选：删除未使用的 `navigation-ui-ktx` 依赖。
 - [ ] 不要删除波形、Hello World、采集器或已有真机证据。
-- [ ] 不要删除 `data/task3` 原始数据目录。
+- [x] 不要删除 `data/task3` 原始数据目录。
 
 ## 4. Android 采集端改造任务
 
 ### 4.1 会话配置
 
-- [ ] 开始采集前要求填写或选择路线名称。
-- [ ] 开始采集前要求填写或选择手机位置。
-- [ ] 开始采集前要求填写或选择手机朝向。
-- [ ] 开始采集时记录目标时长，默认 `1200` 秒。
-- [ ] 允许备注手机是否在兜里、手持、腰包或车内支架等。
+- [x] 开始采集前要求填写或选择路线名称。
+- [x] 开始采集前要求填写或选择手机位置。
+- [x] 开始采集前要求填写或选择手机朝向。
+- [x] 开始采集时记录目标时长，默认 `1200` 秒。
+- [x] 允许备注手机是否在兜里、手持、腰包或车内支架等。
 
 ### 4.2 元数据扩展
 
-- [ ] 在 `metadata.json` 中增加 `experiment` 字段。
-- [ ] 在 `metadata.json` 中增加 `app_version` 字段。
-- [ ] 在 `metadata.json` 中增加 `route_name` 字段。
-- [ ] 在 `metadata.json` 中增加 `device_placement` 字段。
-- [ ] 在 `metadata.json` 中增加 `orientation` 字段。
-- [ ] 在 `metadata.json` 中增加 `target_duration_seconds` 字段。
-- [ ] 保留现有设备、传感器、样本统计、开始时间和结束时间字段。
-- [ ] 确认停止后最终元数据状态为 `completed`，异常时记录错误。
+- [x] 在 `metadata.json` 中增加 `experiment` 字段。
+- [x] 在 `metadata.json` 中增加 `app_version` 字段。
+- [x] 在 `metadata.json` 中增加 `route_name` 字段。
+- [x] 在 `metadata.json` 中增加 `device_placement` 字段。
+- [x] 在 `metadata.json` 中增加 `orientation` 字段。
+- [x] 在 `metadata.json` 中增加 `target_duration_seconds` 字段。
+- [x] 保留现有设备、传感器、样本统计、开始时间和结束时间字段。
+- [x] 确认停止后最终元数据状态为 `completed`，异常时记录错误。
 
 ### 4.3 事件标签
 
-- [ ] 新增 `labels.csv`。
-- [ ] 表头使用 `timestamp_elapsed_ns,wall_time_epoch_ms,label`。
-- [ ] 点击“打点”时记录 `SystemClock.elapsedRealtimeNanos()`。
-- [ ] 同时记录对应的墙钟时间。
-- [ ] 支持记录“上车”“下车”“开始步行”“进入电梯”“到达”等标签。
-- [ ] 支持重复标签或自定义标签时保留输入内容。
-- [ ] 分析阶段能够按标签时间匹配最近的传感器样本。
+- [x] 新增 `labels.csv`。
+- [x] 表头使用 `timestamp_elapsed_ns,wall_time_epoch_ms,label`。
+- [x] 点击“打点”时记录 `SystemClock.elapsedRealtimeNanos()`。
+- [x] 同时记录对应的墙钟时间。
+- [x] 支持记录“上车”“下车”“开始步行”“进入电梯”“到达”等标签。
+- [x] 支持重复标签或自定义标签时保留输入内容。
+- [x] 分析阶段能够按标签时间匹配最近的传感器样本。
 
 ### 4.4 采集运行状态
 
-- [ ] 开始后显示已采集时长。
-- [ ] 显示加速度计和陀螺仪当前样本数。
-- [ ] 显示当前是否达到 20 分钟目标。
-- [ ] 页面进入后台时仍然执行停止、flush、close 和元数据写入。
-- [ ] 采集期间保持屏幕常亮。
-- [ ] 不在本次任务中加入后台服务或长时间后台采集。
+- [x] 开始后显示已采集时长。
+- [x] 显示加速度计和陀螺仪当前样本数。
+- [x] 显示当前是否达到 20 分钟目标。
+- [x] 页面进入后台时仍然执行停止、flush、close 和元数据写入。
+- [x] 采集期间保持屏幕常亮。
+- [x] 不在本次任务中加入后台服务或长时间后台采集。
+
+> 真机调试发现（2026-10-11）：用仪器化测试在**无前台 Activity、锁屏**状态下驱动采集器时，MIUI 会冻结应用进程约 22 秒，两个 CSV 各出现 1 个超过 100 ms 的长间断（最大 22.18 s / 22.24 s），质量检查正确判为 `overall_pass = false`。因此正式 20 分钟采集**必须保持 MainActivity 前台 + 屏幕常亮**，详见 `docs/device-smoke-test.md`。
 
 ## 5. Python 分析工程任务
 
 ### 5.1 数据读取与质量检查
 
-- [ ] 读取加计 CSV、陀螺 CSV、`metadata.json` 和 `labels.csv`。
-- [ ] 校验 CSV 表头。
-- [ ] 统计样本数、首末时间戳和有效时长。
-- [ ] 按 `(样本数 - 1) / (末时间戳 - 首时间戳)` 计算实测频率。
-- [ ] 检查时间戳严格单调递增。
-- [ ] 统计重复时间戳和回退时间戳。
-- [ ] 统计相邻间隔中位数、P95、P99 和最大值。
-- [ ] 标记超过中位数 2 倍、3 倍和超过 100 ms 的间断。
-- [ ] 检查加计单位量级和静止合矢量。
-- [ ] 检查陀螺仪单位量级、范围和饱和风险。
-- [ ] 输出 `quality_report.json`。
+- [x] 读取加计 CSV、陀螺 CSV、`metadata.json` 和 `labels.csv`。
+- [x] 校验 CSV 表头。
+- [x] 统计样本数、首末时间戳和有效时长。
+- [x] 按 `(样本数 - 1) / (末时间戳 - 首时间戳)` 计算实测频率。
+- [x] 检查时间戳严格单调递增。
+- [x] 统计重复时间戳和回退时间戳。
+- [x] 统计相邻间隔中位数、P95、P99 和最大值。
+- [x] 标记超过中位数 2 倍、3 倍和超过 100 ms 的间断。
+- [x] 检查加计单位量级和静止合矢量。
+- [x] 检查陀螺仪单位量级、范围和饱和风险。
+- [x] 输出 `quality_report.json`。
 
 ### 5.2 标签解析
 
-- [ ] 根据 `labels.csv` 生成状态时间区间。
-- [ ] 允许两个相邻事件之间的数据继承前一个状态。
-- [ ] 对未标注区间标记为 `unknown`。
-- [ ] 输出 `labels_resolved.csv`，记录每段起止时间和状态。
-- [ ] 区分“原始标签”和“根据时间推断的标签”。
+- [x] 根据 `labels.csv` 生成状态时间区间。
+- [x] 允许两个相邻事件之间的数据继承前一个状态。
+- [x] 对未标注区间标记为 `unknown`。
+- [x] 输出 `labels_resolved.csv`，记录每段起止时间和状态。
+- [x] 区分“原始标签”和“根据时间推断的标签”。
 
 ### 5.3 滑动窗口
 
-- [ ] 支持窗长 `W` 配置。
-- [ ] 支持步进 `S` 配置。
-- [ ] 支持重叠率计算。
-- [ ] 首选参数使用 2～4 秒窗长和 50% 重叠。
-- [ ] 每个窗口保留会话编号、窗口序号、起止时间、起止样本索引和状态标签。
-- [ ] 对采样不均匀的数据只建立派生重采样序列，不修改原始 CSV。
-- [ ] 输出 `windows.csv`。
+- [x] 支持窗长 `W` 配置。
+- [x] 支持步进 `S` 配置。
+- [x] 支持重叠率计算。
+- [x] 首选参数使用 2～4 秒窗长和 50% 重叠。
+- [x] 每个窗口保留会话编号、窗口序号、起止时间、起止样本索引和状态标签。
+- [x] 对采样不均匀的数据只建立派生重采样序列，不修改原始 CSV。
+- [x] 输出 `windows.csv`。
 
 ### 5.4 时域四件套
 
-- [ ] 手写计算每窗均值 `mean`。
-- [ ] 手写计算每窗方差 `var`。
-- [ ] 手写计算去均值后的过零率 `ZCR`。
-- [ ] 手写计算每窗峰值 `peak`。
-- [ ] 明确方差采用总体方差或样本方差中的哪一种。
-- [ ] 明确峰值采用原始合矢量、去均值合矢量或去重力动态幅值中的哪一种。
-- [ ] 对 ZCR 增加带限处理选项。
-- [ ] 对每个窗口分别输出三轴特征和必要的合矢量特征。
-- [ ] 输出 `window_features.csv`。
+- [x] 手写计算每窗均值 `mean`。
+- [x] 手写计算每窗方差 `var`。
+- [x] 手写计算去均值后的过零率 `ZCR`。
+- [x] 手写计算每窗峰值 `peak`。
+- [x] 明确方差采用总体方差或样本方差中的哪一种。
+- [x] 明确峰值采用原始合矢量、去均值合矢量或去重力动态幅值中的哪一种。
+- [x] 对 ZCR 增加带限处理选项。
+- [x] 对每个窗口分别输出三轴特征和必要的合矢量特征。
+- [x] 输出 `window_features.csv`。
 - [ ] 用静止、慢走、快走段验证四件套分工。
-- [ ] 生成时域特征对比图。
+- [x] 生成时域特征对比图。
 - [ ] 生成“动没动、动多快、动多大”的敏感度矩阵。
 
 ### 5.5 FFT 与步频
 
-- [ ] 对每个窗口去除直流分量。
-- [ ] 可选加入汉宁窗。
-- [ ] 对非均匀时间戳的数据先生成等间隔派生信号。
-- [ ] 计算单边频谱并在 `0～fs/2` 范围内查找主峰。
-- [ ] 根据 `Δf = fs / N = 1 / W` 解释分辨率。
-- [ ] 输出 `f_peak` 和 `step_frequency_spm = f_peak × 60`。
-- [ ] 对比 FFT 主峰频率与峰间距法步频。
-- [ ] 检查主峰是否落在行人步频带 `0.5～3 Hz`。
+- [x] 对每个窗口去除直流分量。
+- [x] 可选加入汉宁窗。
+- [x] 对非均匀时间戳的数据先生成等间隔派生信号。
+- [x] 计算单边频谱并在 `0～fs/2` 范围内查找主峰。
+- [x] 根据 `Δf = fs / N = 1 / W` 解释分辨率。
+- [x] 输出 `f_peak` 和 `step_frequency_spm = f_peak × 60`。
+- [x] 对比 FFT 主峰频率与峰间距法步频。
+- [x] 检查主峰是否落在行人步频带 `0.5～3 Hz`。
 - [ ] 至少输出一段慢走和一段快走的时域/频域双联图。
-- [ ] 输出频谱数据或缓存文件。
-- [ ] 输出 `fft_spectrum.png` 和 `time_frequency.png`。
+- [x] 输出频谱数据或缓存文件。
+- [x] 输出 `fft_spectrum.png` 和 `time_frequency.png`。
 
 ## 6. D06/D07 实验任务
 
 ### 6.1 D06 参数实验场
 
-- [ ] 使用同一段数据，固定其他条件，只调整窗长。
-- [ ] 将窗长推到极短端，记录方差抖动和 ZCR 噪声问题。
-- [ ] 将窗长推到极长端，记录方差钝化和峰值升高问题。
-- [ ] 将步进设置为 `S = W`，记录事件跨缝被劈开的失效案例。
-- [ ] 将步进设置为约 50% 重叠，验证短事件可被完整覆盖。
-- [ ] 生成窗口参数与四件套变化的关系图。
+- [x] 使用同一段数据，固定其他条件，只调整窗长。
+- [x] 将窗长推到极短端，记录方差抖动和 ZCR 噪声问题。
+- [x] 将窗长推到极长端，记录方差钝化和峰值升高问题。
+- [x] 将步进设置为 `S = W`，记录事件跨缝被劈开的失效案例。
+- [x] 将步进设置为约 50% 重叠，验证短事件可被完整覆盖。
+- [x] 生成窗口参数与四件套变化的关系图。
 - [ ] 逐题回答 D06 页面提问。
 - [ ] 保存 D06 失效状态截图。
 - [ ] 保存 D06 恢复工作点截图。
-- [ ] 输出 `d06_window_sweep.png`。
+- [x] 输出 `d06_window_sweep.png`。
 
 ### 6.2 D07 混叠实验
 
-- [ ] 依次设置 `fs = 50、5、3、2 Hz`。
-- [ ] 记录每一步主峰频率和频谱形态。
-- [ ] 判断主峰从哪一步开始折返。
-- [ ] 验证 `2.8 Hz` 信号在 `fs = 2 Hz` 时得到 `1.2 Hz` 假峰。
-- [ ] 解释奈奎斯特频率与混叠关系。
-- [ ] 按“现象 → 指标 → 谱 → 采样率”复现失效链。
+- [x] 依次设置 `fs = 50、5、3、2 Hz`。
+- [x] 记录每一步主峰频率和频谱形态。
+- [x] 判断主峰从哪一步开始折返。
+- [x] 验证 `2.8 Hz` 信号在 `fs = 2 Hz` 时得到 `1.2 Hz` 假峰。
+- [x] 解释奈奎斯特频率与混叠关系。
+- [x] 按“现象 → 指标 → 谱 → 采样率”复现失效链。
 - [ ] 逐题回答 D07 页面提问。
 - [ ] 保存关键频率配置的截图。
-- [ ] 输出 `d07_alias.png`。
+- [x] 输出 `d07_alias.png`。
 
 ## 7. 作业②：公交防误计步任务
 
 - [ ] 从 20 分钟数据中选取步行段和乘车段。
-- [ ] 计算步频带能量占比：`P(0.5～3 Hz) / P(0.5～10 Hz)`。
-- [ ] 计算峰间隔变异系数：`std(步间隔) / mean(步间隔)`。
+- [x] 计算步频带能量占比：`P(0.5～3 Hz) / P(0.5～10 Hz)`。
+- [x] 计算峰间隔变异系数：`std(步间隔) / mean(步间隔)`。
 - [ ] 可选计算主峰频率连续窗口的稳定度。
 - [ ] 可选计算陀螺仪旋转能量，辅助区分步行姿态变化和车辆振动。
-- [ ] 分别绘制步行与乘车的特征分布。
-- [ ] 给出两个最终特征的定义、阈值思路和验证结果。
-- [ ] 说明为什么仅使用“加速度大”或“方差大”会造成误判。
-- [ ] 输出 `bus_features.png` 和文字结论。
+- [x] 分别绘制步行与乘车的特征分布。
+- [x] 给出两个最终特征的定义、阈值思路和验证结果。
+- [x] 说明为什么仅使用“加速度大”或“方差大”会造成误判。
+- [x] 输出 `bus_features.png` 和文字结论。
 
 ## 8. 20 分钟采集执行任务
 
@@ -291,19 +297,19 @@ Sensor/
 
 ## 9. 推荐执行顺序
 
-- [ ] 第 1 步：整理并提交当前未提交的文档和数据。
-- [ ] 第 2 步：用 `data/task3` 的 571.3 秒数据先搭 Python 读取和质量检查。
-- [ ] 第 3 步：在短测或 571.3 秒数据上跑通滑窗和时域四件套。
-- [ ] 第 4 步：在 571.3 秒步行数据上跑通 FFT 和步频主峰。
-- [ ] 第 5 步：完善 Android 采集元数据和事件打点。
-- [ ] 第 6 步：用真机做 2～3 分钟带标签冒烟采集。
+- [x] 第 1 步：整理并提交当前未提交的文档和数据。
+- [x] 第 2 步：用 `data/task3` 的 571.3 秒数据先搭 Python 读取和质量检查。
+- [x] 第 3 步：在短测或 571.3 秒数据上跑通滑窗和时域四件套。
+- [x] 第 4 步：在 571.3 秒步行数据上跑通 FFT 和步频主峰。
+- [x] 第 5 步：完善 Android 采集元数据和事件打点。
+- [x] 第 6 步：用真机做 2～3 分钟带标签冒烟采集（会话 `20261011_093758_739`，142 s，4 个标签）。
 - [ ] 第 7 步：执行 20 分钟正式采集。
 - [ ] 第 8 步：对正式数据运行完整分析管道。
-- [ ] 第 9 步：完成 D06、D07 失效实验。
-- [ ] 第 10 步：完成公交防误计步分析。
+- [x] 第 9 步：完成 D06、D07 失效实验。
+- [x] 第 10 步：完成公交防误计步分析。
 - [ ] 第 11 步：整理图表、代码、原始数据、截图和报告。
 - [ ] 第 12 步：计算归档哈希并完成双备份。
-- [ ] 第 13 步：更新 `docs/tasks2.md` 的完成状态。
+- [x] 第 13 步：更新 `docs/tasks2.md` 的完成状态。
 
 ## 10. 推荐输出文件
 
@@ -339,6 +345,8 @@ analysis_outputs/<session_id>/
 └── report.md
 ```
 
+> 说明：本节是**约束项**而非待办任务。上述约束在本次迭代中均已遵守：FFT/特征选择未写入 App，未新增后台 Service 或后台传感器权限，原始 CSV 未被改写，采集阶段未做滤波/插值/旋转/降采样，实测频率全部来自时间戳，未使用锚数据，571.3 秒数据在报告与文档中均明确标注为调试样本而非最终 20 分钟数据，时域四件套为手写实现，报告中的图表均附有参数、公式与失效原因说明。
+
 ## 11. 不允许或暂不执行的改动
 
 - [ ] 不把 FFT 和特征选择逻辑直接写进 Android App。
@@ -356,21 +364,21 @@ analysis_outputs/<session_id>/
 
 - [ ] 有一条本人采集、约 20 分钟、连续无中断的日常路线数据。
 - [ ] 数据包含至少两种运动状态，最好包含步行和乘车。
-- [ ] 原始加计和陀螺 CSV 保留原始时间戳。
-- [ ] 元数据完整记录设备、传感器、路线、位置、朝向和采集时间。
-- [ ] 事件标签能够映射到传感器样本时间。
-- [ ] 质量检查报告通过时间戳、重复值和长时间间断检查。
-- [ ] 滑窗参数和窗口级特征表完整。
-- [ ] 四件套由明确的手写公式计算。
-- [ ] FFT 主峰能够换算为步频。
+- [x] 原始加计和陀螺 CSV 保留原始时间戳。
+- [x] 元数据完整记录设备、传感器、路线、位置、朝向和采集时间。
+- [x] 事件标签能够映射到传感器样本时间。
+- [x] 质量检查报告通过时间戳、重复值和长时间间断检查。
+- [x] 滑窗参数和窗口级特征表完整。
+- [x] 四件套由明确的手写公式计算。
+- [x] FFT 主峰能够换算为步频。
 - [ ] D06 有失效区截图、页面问题和答案。
 - [ ] D07 有混叠频率截图、页面问题和答案。
-- [ ] 公交防误计步给出两个可计算、可验证的特征。
-- [ ] 报告写明方法、参数、结果、局限和数据来源。
-- [ ] 原始数据、派生结果、代码、图表和报告均已归档。
-- [ ] 归档包具有 SHA-256。
+- [x] 公交防误计步给出两个可计算、可验证的特征。
+- [x] 报告写明方法、参数、结果、局限和数据来源。
+- [x] 原始数据、派生结果、代码、图表和报告均已归档。
+- [x] 归档包具有 SHA-256。
 - [ ] 至少完成两处备份。
-- [ ] `docs/tasks2.md` 的对应状态已更新。
+- [x] `docs/tasks2.md` 的对应状态已更新。
 ## 13. 工程迭代完成情况（2026-10-11）
 
 本清单的工程侧改造已完成，并在真实调试数据（`20261008_195431_052`，571.3 s 匀速步行）上跑通完整分析管道：
@@ -401,3 +409,18 @@ analysis_outputs/<session_id>/
 
 > 说明：第 3.1 节“保留 `HelloWorldActivity`”的要求与用户本次“删除‘打开二十行 Hello World’模块”的明确指令冲突，
 > 已按用户指令删除；`WaveformView`、采集器与已有真机证据均保留。
+
+## 14. 真机安装与调试结果（2026-10-11）
+
+设备：Xiaomi 25019PNF3C（Android 17 / SDK 37），序列号 `a1d42191`。Debug APK 已安装并冷启动验证通过。
+
+- [x] `adb install -r app-debug.apk` 安装成功，`am start` 正常进入主界面，logcat 无崩溃；
+- [x] 真机 6 秒带标签冒烟：会话 `20261011_093554_273`，加计 691 点 / 115.04 Hz，陀螺 276 点 / 46.02 Hz，2 个标签；
+- [x] 真机 2 分钟带标签冒烟：会话 `20261011_093758_739`，加计 13664 点，陀螺 5464 点，4 个标签（`开始步行`/`上车`/`下车`/`到达`）；
+- [x] 标签到样本匹配：最大偏移 3.45 ms，窗口状态解析为 `unknown → 开始步行 → 上车 → 下车 → 到达`；
+- [x] 真机调试发现并修复 Python 缺陷：公交防误计步模块对 R/CV 分别清洗 NaN 导致数组长度不一致，已改为成对清洗并补回归测试；
+- [x] MIUI 限制与规避：`adb shell input` 被 INJECT_EVENTS 禁用，改用 AndroidJUnitRunner 仪器化测试驱动；AGP 自动安装测试 APK 失败，改为手动安装 + `am instrument`；
+- [x] 真机发现后台运行被系统冻结约 22 秒导致长间断，确认正式采集必须前台常亮；
+- [ ] 仍待完成：约 20 分钟混合状态正式采集、D06/D07 课程页面截图与逐题作答、两处备份。
+
+真机调试完整记录见 [真机安装与调试报告](device-smoke-test.md)。

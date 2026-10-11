@@ -1,0 +1,5 @@
+﻿session_id,window_id,start_seconds,end_seconds,start_index,end_index,sample_count,state,window_seconds,step_seconds,overlap_ratio
+20261011_093554_273,0,0.0,2.0,0,231,231,unknown,2.0,1.0,0.5
+20261011_093554_273,1,1.0,3.0,116,346,230,unknown,2.0,1.0,0.5
+20261011_093554_273,2,2.0,4.0,231,461,230,开始步行,2.0,1.0,0.5
+20261011_093554_273,3,3.0,5.0,346,576,230,到达,2.0,1.0,0.5

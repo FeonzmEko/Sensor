@@ -1,0 +1,259 @@
+{
+  "directory": "D:\\code\\Sensor\\data\\lesson2\\20261011_093554_273",
+  "session_id": "20261011_093554_273",
+  "files": {
+    "accelerometer.csv": {
+      "size_bytes": 32483,
+      "sha256": "1E68E891F119C0F605FFB5C6F8846ACA42AA240297952BCDFC7A295D5581ADA7"
+    },
+    "gyroscope.csv": {
+      "size_bytes": 13471,
+      "sha256": "8B9B34EFE6E4FDFA3F4ED6EBE5BF570D82B8C0751A9BC1817FCE450B2793C745"
+    },
+    "metadata.json": {
+      "size_bytes": 2228,
+      "sha256": "A0C4C78B7DFB43AC706CB33D2D89DF738F55EF7AA6B63CE7D4712085582E43FF"
+    },
+    "labels.csv": {
+      "size_bytes": 126,
+      "sha256": "20BD57BDA5B9AE2B0DDC478B869B48932C2AC3567B8C9C439F5F9BC35ED06939"
+    }
+  },
+  "sensors": {
+    "accelerometer": {
+      "header_ok": true,
+      "header": [
+        "timestamp_ns",
+        "x_m_s2",
+        "y_m_s2",
+        "z_m_s2"
+      ],
+      "sample_count": 691,
+      "first_timestamp_ns": 758330526870654,
+      "last_timestamp_ns": 758336524778831,
+      "duration_seconds": 5.997908177,
+      "measured_hz": 115.04010725704713,
+      "strictly_monotonic": true,
+      "duplicate_count": 0,
+      "regression_count": 0,
+      "gaps_over_2x_median": 0,
+      "gaps_over_3x_median": 0,
+      "gaps_over_100ms": 0,
+      "vector_mean": 9.813636166370554,
+      "vector_stddev": 0.010770195912449739,
+      "vector_min": 9.777661124493111,
+      "vector_max": 9.870655460770486,
+      "vector_p01": 9.789693010431927,
+      "vector_p99": 9.838060552029004,
+      "axes": {
+        "x": {
+          "mean": -0.28804078329956584,
+          "stddev": 0.004609737208820022,
+          "min": -0.30987054,
+          "max": -0.2739782
+        },
+        "y": {
+          "mean": 0.6882213189725036,
+          "stddev": 0.004860300302474881,
+          "min": 0.6753742,
+          "max": 0.7040881
+        },
+        "z": {
+          "mean": 9.785233466714907,
+          "stddev": 0.010763641133247948,
+          "min": 9.749556,
+          "max": 9.8428755
+        }
+      },
+      "first_row": [
+        758330526870654.0,
+        -0.28594232,
+        0.69212395,
+        9.792626
+      ],
+      "last_row": [
+        758336524778831.0,
+        -0.28115666,
+        0.69212395,
+        9.795019
+      ],
+      "interval_us_min": 8692.552,
+      "interval_us_median": 8692.604,
+      "interval_us_p95": 8692.657,
+      "interval_us_p99": 8692.657,
+      "interval_us_max": 8692.657,
+      "unit_check": {
+        "expect": "m/s^2，静止合矢量接近 9.81",
+        "vector_mean": 9.813636166370554,
+        "static_like": true,
+        "max_range_observed": 9.8428755,
+        "saturation_risk": false
+      }
+    },
+    "gyroscope": {
+      "header_ok": true,
+      "header": [
+        "timestamp_ns",
+        "x_rad_s",
+        "y_rad_s",
+        "z_rad_s"
+      ],
+      "sample_count": 276,
+      "first_timestamp_ns": 758330537232893,
+      "last_timestamp_ns": 758336513409456,
+      "duration_seconds": 5.976176563,
+      "measured_hz": 46.016043385095685,
+      "strictly_monotonic": true,
+      "duplicate_count": 0,
+      "regression_count": 0,
+      "gaps_over_2x_median": 0,
+      "gaps_over_3x_median": 0,
+      "gaps_over_100ms": 0,
+      "vector_mean": 0.0008808825794054669,
+      "vector_stddev": 0.0005062690582976037,
+      "vector_min": 0.0,
+      "vector_max": 0.0038209580872595925,
+      "vector_p01": 0.0001527162,
+      "vector_p99": 0.002694968076322221,
+      "axes": {
+        "x": {
+          "mean": 1.659958478260869e-06,
+          "stddev": 0.00045713003316279975,
+          "min": -0.0012217296,
+          "max": 0.0015271619
+        },
+        "y": {
+          "mean": -0.000123943579057971,
+          "stddev": 0.0008425107398501433,
+          "min": -0.0036651888,
+          "max": 0.0029016077
+        },
+        "z": {
+          "mean": 8.687117028985507e-05,
+          "stddev": 0.00030093005437798164,
+          "min": -0.0004581486,
+          "max": 0.00076358096
+        }
+      },
+      "first_row": [
+        758330537232893.0,
+        -0.0004581486,
+        0.0012217296,
+        0.0003054324
+      ],
+      "last_row": [
+        758336513409456.0,
+        -0.0003054324,
+        0.0003054324,
+        0.00076358096
+      ],
+      "interval_us_min": 21731.51,
+      "interval_us_median": 21731.562,
+      "interval_us_p95": 21731.563,
+      "interval_us_p99": 21731.563,
+      "interval_us_max": 21731.563,
+      "unit_check": {
+        "expect": "rad/s，静止接近 0",
+        "vector_mean": 0.0008808825794054669,
+        "vector_p99": 0.002694968076322221,
+        "max_range_observed": 0.0036651888,
+        "saturation_risk": false
+      }
+    }
+  },
+  "labels": {
+    "count": 2,
+    "file": "labels.csv",
+    "max_offset_ms": 4.231373000000094,
+    "events": [
+      {
+        "label": "开始步行",
+        "relative_seconds": 2.511543992,
+        "nearest_accel_index": 289,
+        "nearest_accel_seconds": 2.512167344,
+        "offset_ms": 0.6233519999998549
+      },
+      {
+        "label": "到达",
+        "relative_seconds": 3.21203821,
+        "nearest_accel_index": 370,
+        "nearest_accel_seconds": 3.216269583,
+        "offset_ms": 4.231373000000094
+      }
+    ]
+  },
+  "metadata": {
+    "schema_version": 2,
+    "session_id": "20261011_093554_273",
+    "status": "completed",
+    "stop_reason": "connectedAndroidTest 完成",
+    "experiment": "lesson2-feature-engineering",
+    "app_version": "1.0",
+    "route_name": "instrumented-device-smoke",
+    "device_placement": "手持",
+    "orientation": "屏幕朝上平放",
+    "target_duration_seconds": 5,
+    "note": "connectedAndroidTest 真机冒烟",
+    "started_at": "2026-10-11 09:35:54.274 +0800",
+    "ended_at": "2026-10-11 09:36:00.304 +0800",
+    "started_elapsed_realtime_ns": 758330520227303,
+    "ended_elapsed_realtime_ns": 758336549854176,
+    "sample_clock": "SensorEvent.timestamp, nanoseconds, same boot-time clock for both sensors",
+    "coordinate_system": "Android device body frame X/Y/Z",
+    "device": {
+      "manufacturer": "Xiaomi",
+      "model": "25019PNF3C",
+      "device": "xuanyuan",
+      "android_release": "17",
+      "android_sdk": 37
+    },
+    "sensors": {
+      "accelerometer": {
+        "name": "lsm6dsv Accelerometer Non-wakeup",
+        "vendor": "STMicro",
+        "version": 28676,
+        "type": 1,
+        "max_range": 156.9064,
+        "resolution": 0.0047856453,
+        "min_delay_us": 5000,
+        "reporting_mode": 0
+      },
+      "gyroscope": {
+        "name": "lsm6dsv Gyroscope Non-wakeup",
+        "vendor": "STMicro",
+        "version": 28676,
+        "type": 4,
+        "max_range": 34.906036,
+        "resolution": 0.0012217296,
+        "min_delay_us": 5000,
+        "reporting_mode": 0
+      }
+    },
+    "samples": {
+      "accelerometer": {
+        "unit": "m/s^2",
+        "sample_count": 691,
+        "first_timestamp_ns": 758330526870654,
+        "last_timestamp_ns": 758336524778831,
+        "duration_seconds": 5.997908177,
+        "measured_hz": 115.04010725704713
+      },
+      "gyroscope": {
+        "unit": "rad/s",
+        "sample_count": 276,
+        "first_timestamp_ns": 758330537232893,
+        "last_timestamp_ns": 758336513409456,
+        "duration_seconds": 5.976176563,
+        "measured_hz": 46.016043385095685
+      }
+    },
+    "labels": {
+      "file": "labels.csv",
+      "header": "timestamp_elapsed_ns,wall_time_epoch_ms,label",
+      "count": 2,
+      "clock": "timestamp_elapsed_ns uses SystemClock.elapsedRealtimeNanos(), the same boot-time clock as SensorEvent.timestamp"
+    },
+    "error": null
+  },
+  "overall_pass": true
+}
