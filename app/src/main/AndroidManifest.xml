@@ -22,13 +22,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".HelloWorldActivity"
-            android:exported="true"
-            android:label="@string/hello_world_title"
-            android:theme="@style/Theme.SensorLog"
-            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

@@ -36,18 +36,42 @@ internal data class SensorSampleStats(
         }
 }
 
+/**
+ * 一次采集会话的配置。开始采集前由 UI 填写，最终写入 metadata.json，
+ * 用于第 2 次课对数据来源、手机摆放方式和目标时长进行追溯。
+ */
+internal data class SessionConfig(
+    val routeName: String,
+    val devicePlacement: String,
+    val orientation: String,
+    val targetDurationSeconds: Int = DEFAULT_TARGET_DURATION_SECONDS,
+    val experiment: String = "lesson2-feature-engineering",
+    val note: String = "",
+) {
+    companion object {
+        const val DEFAULT_TARGET_DURATION_SECONDS = 1200
+    }
+}
+
 internal data class RecorderSnapshot(
     val active: Boolean,
     val accelerometerCount: Long,
     val gyroscopeCount: Long,
+    val labelCount: Long,
+    val elapsedSeconds: Double,
+    val targetDurationSeconds: Int,
     val error: String?,
-)
+) {
+    val targetReached: Boolean
+        get() = targetDurationSeconds > 0 && elapsedSeconds >= targetDurationSeconds
+}
 
 internal data class RecordingSummary(
     val sessionId: String,
     val directory: File,
     val accelerometer: SensorSampleStats,
     val gyroscope: SensorSampleStats,
+    val labelCount: Long,
     val error: String?,
 )
 
@@ -55,9 +79,10 @@ internal data class RecordingSummary(
  * 将 SensorEvent 原样写入两个 CSV：
  * - accelerometer.csv: timestamp_ns,x_m_s2,y_m_s2,z_m_s2
  * - gyroscope.csv: timestamp_ns,x_rad_s,y_rad_s,z_rad_s
+ * - labels.csv: timestamp_elapsed_ns,wall_time_epoch_ms,label
  *
  * 不执行滤波、插值、坐标旋转、单位换算或降采样。metadata.json 同时记录
- * 设备、传感器参数、采集时间和完成状态，便于后续追溯。
+ * 设备、传感器参数、采集配置、采集时间和完成状态，便于后续追溯。
  */
 internal class SensorSessionRecorder(context: Context) {
 
@@ -67,8 +92,11 @@ internal class SensorSessionRecorder(context: Context) {
     private var active = false
     private var sessionId: String? = null
     private var sessionDirectory: File? = null
+    private var config: SessionConfig? = null
+
     private var accelerometerWriter: BufferedWriter? = null
     private var gyroscopeWriter: BufferedWriter? = null
+    private var labelsWriter: BufferedWriter? = null
 
     private var accelerometer: Sensor? = null
     private var gyroscope: Sensor? = null
@@ -80,6 +108,7 @@ internal class SensorSessionRecorder(context: Context) {
 
     private var accelerometerCount = 0L
     private var gyroscopeCount = 0L
+    private var labelCount = 0L
     private var accelerometerFirstTimestampNs: Long? = null
     private var accelerometerLastTimestampNs: Long? = null
     private var gyroscopeFirstTimestampNs: Long? = null
@@ -91,63 +120,78 @@ internal class SensorSessionRecorder(context: Context) {
     fun isRecording(): Boolean = synchronized(lock) { active }
 
     fun snapshot(): RecorderSnapshot = synchronized(lock) {
+        val elapsedSeconds = if (active) {
+            (SystemClock.elapsedRealtimeNanos() - startedAtElapsedNs) / 1_000_000_000.0
+        } else {
+            0.0
+        }
         RecorderSnapshot(
             active = active,
             accelerometerCount = accelerometerCount,
             gyroscopeCount = gyroscopeCount,
+            labelCount = labelCount,
+            elapsedSeconds = elapsedSeconds,
+            targetDurationSeconds = config?.targetDurationSeconds
+                ?: SessionConfig.DEFAULT_TARGET_DURATION_SECONDS,
             error = recordingError,
         )
     }
 
     @Throws(IOException::class)
-    fun start(accelerometer: Sensor, gyroscope: Sensor): File = synchronized(lock) {
-        check(!active) { "已有采集会话正在进行" }
+    fun start(accelerometer: Sensor, gyroscope: Sensor, sessionConfig: SessionConfig): File =
+        synchronized(lock) {
+            check(!active) { "已有采集会话正在进行" }
 
-        resetState()
-        this.accelerometer = accelerometer
-        this.gyroscope = gyroscope
+            resetState()
+            this.accelerometer = accelerometer
+            this.gyroscope = gyroscope
+            this.config = sessionConfig
 
-        val storageRoot = appContext.getExternalFilesDir(null) ?: appContext.filesDir
-        val sessionsRoot = File(storageRoot, "sensor-sessions")
-        if (!sessionsRoot.exists() && !sessionsRoot.mkdirs()) {
-            throw IOException("无法创建采集目录：${sessionsRoot.absolutePath}")
+            val storageRoot = appContext.getExternalFilesDir(null) ?: appContext.filesDir
+            val sessionsRoot = File(storageRoot, "sensor-sessions")
+            if (!sessionsRoot.exists() && !sessionsRoot.mkdirs()) {
+                throw IOException("无法创建采集目录：${sessionsRoot.absolutePath}")
+            }
+
+            val baseSessionId = SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(Date())
+            var candidate = File(sessionsRoot, baseSessionId)
+            var suffix = 2
+            while (candidate.exists()) {
+                candidate = File(sessionsRoot, "${baseSessionId}_$suffix")
+                suffix++
+            }
+            if (!candidate.mkdirs()) {
+                throw IOException("无法创建采集会话目录：${candidate.absolutePath}")
+            }
+
+            sessionId = candidate.name
+            sessionDirectory = candidate
+            startedAtEpochMs = System.currentTimeMillis()
+            startedAtElapsedNs = SystemClock.elapsedRealtimeNanos()
+
+            try {
+                accelerometerWriter = openWriter(
+                    file = File(candidate, "accelerometer.csv"),
+                    header = "timestamp_ns,x_m_s2,y_m_s2,z_m_s2",
+                )
+                gyroscopeWriter = openWriter(
+                    file = File(candidate, "gyroscope.csv"),
+                    header = "timestamp_ns,x_rad_s,y_rad_s,z_rad_s",
+                )
+                labelsWriter = openWriter(
+                    file = File(candidate, "labels.csv"),
+                    header = LABELS_HEADER,
+                )
+                active = true
+                writeMetadataLocked(status = "recording", stopReason = null)
+                candidate
+            } catch (t: Throwable) {
+                active = false
+                recordingError = t.message ?: t.javaClass.simpleName
+                closeWritersLocked()
+                throw t
+            }
         }
-
-        val baseSessionId = SimpleDateFormat("yyyyMMdd_HHmmss_SSS", Locale.US).format(Date())
-        var candidate = File(sessionsRoot, baseSessionId)
-        var suffix = 2
-        while (candidate.exists()) {
-            candidate = File(sessionsRoot, "${baseSessionId}_$suffix")
-            suffix++
-        }
-        if (!candidate.mkdirs()) {
-            throw IOException("无法创建采集会话目录：${candidate.absolutePath}")
-        }
-
-        sessionId = candidate.name
-        sessionDirectory = candidate
-        startedAtEpochMs = System.currentTimeMillis()
-        startedAtElapsedNs = SystemClock.elapsedRealtimeNanos()
-
-        try {
-            accelerometerWriter = openWriter(
-                file = File(candidate, "accelerometer.csv"),
-                header = "timestamp_ns,x_m_s2,y_m_s2,z_m_s2",
-            )
-            gyroscopeWriter = openWriter(
-                file = File(candidate, "gyroscope.csv"),
-                header = "timestamp_ns,x_rad_s,y_rad_s,z_rad_s",
-            )
-            active = true
-            writeMetadataLocked(status = "recording", stopReason = null)
-            candidate
-        } catch (t: Throwable) {
-            active = false
-            recordingError = t.message ?: t.javaClass.simpleName
-            closeWritersLocked()
-            throw t
-        }
-    }
 
     fun write(event: SensorEvent) {
         val sensorType = event.sensor.type
@@ -189,6 +233,36 @@ internal class SensorSessionRecorder(context: Context) {
         }
     }
 
+    /**
+     * 记录一次事件打点，返回是否写入成功。
+     *
+     * 时间基准使用 SystemClock.elapsedRealtimeNanos()，与 SensorEvent.timestamp 同为
+     * 系统启动时钟，因此分析阶段可以用该时间在 CSV 中匹配最近的传感器样本。
+     */
+    fun markEvent(label: String): Boolean {
+        val normalized = label.trim()
+        if (normalized.isEmpty()) return false
+
+        synchronized(lock) {
+            if (!active) return false
+            val writer = labelsWriter ?: return false
+            return try {
+                writer.write(SystemClock.elapsedRealtimeNanos().toString())
+                writer.write(",")
+                writer.write(System.currentTimeMillis().toString())
+                writer.write(",")
+                writer.write(escapeCsv(normalized))
+                writer.newLine()
+                writer.flush()
+                labelCount++
+                true
+            } catch (t: Throwable) {
+                recordingError = t.message ?: t.javaClass.simpleName
+                false
+            }
+        }
+    }
+
     fun stop(stopReason: String): RecordingSummary? = synchronized(lock) {
         if (!active) return null
 
@@ -217,8 +291,10 @@ internal class SensorSessionRecorder(context: Context) {
         active = false
         sessionId = null
         sessionDirectory = null
+        config = null
         accelerometerWriter = null
         gyroscopeWriter = null
+        labelsWriter = null
         accelerometer = null
         gyroscope = null
         startedAtEpochMs = 0L
@@ -227,6 +303,7 @@ internal class SensorSessionRecorder(context: Context) {
         endedAtElapsedNs = null
         accelerometerCount = 0L
         gyroscopeCount = 0L
+        labelCount = 0L
         accelerometerFirstTimestampNs = null
         accelerometerLastTimestampNs = null
         gyroscopeFirstTimestampNs = null
@@ -258,21 +335,13 @@ internal class SensorSessionRecorder(context: Context) {
     private fun flushWritersLocked() {
         accelerometerWriter?.flush()
         gyroscopeWriter?.flush()
+        labelsWriter?.flush()
         rowsSinceFlush = 0
     }
 
     private fun closeWritersLocked() {
-        accelerometerWriter?.let { writer ->
-            try {
-                writer.flush()
-            } catch (_: Throwable) {
-            }
-            try {
-                writer.close()
-            } catch (_: Throwable) {
-            }
-        }
-        gyroscopeWriter?.let { writer ->
+        listOf(accelerometerWriter, gyroscopeWriter, labelsWriter).forEach { writer ->
+            writer ?: return@forEach
             try {
                 writer.flush()
             } catch (_: Throwable) {
@@ -284,6 +353,7 @@ internal class SensorSessionRecorder(context: Context) {
         }
         accelerometerWriter = null
         gyroscopeWriter = null
+        labelsWriter = null
     }
 
     private fun buildSummaryLocked(): RecordingSummary {
@@ -302,12 +372,18 @@ internal class SensorSessionRecorder(context: Context) {
             directory = sessionDirectory ?: appContext.filesDir,
             accelerometer = accelerometerStats,
             gyroscope = gyroscopeStats,
+            labelCount = labelCount,
             error = recordingError,
         )
     }
 
     private fun writeMetadataLocked(status: String, stopReason: String?) {
         val directory = sessionDirectory ?: return
+        val currentConfig = config ?: SessionConfig(
+            routeName = "",
+            devicePlacement = "",
+            orientation = "",
+        )
         val accelerometerStats = SensorSampleStats(
             sampleCount = accelerometerCount,
             firstTimestampNs = accelerometerFirstTimestampNs,
@@ -320,10 +396,17 @@ internal class SensorSessionRecorder(context: Context) {
         )
 
         val root = JSONObject()
-            .put("schema_version", 1)
+            .put("schema_version", 2)
             .put("session_id", sessionId)
             .put("status", status)
             .put("stop_reason", stopReason ?: JSONObject.NULL)
+            .put("experiment", currentConfig.experiment)
+            .put("app_version", resolveAppVersion())
+            .put("route_name", currentConfig.routeName)
+            .put("device_placement", currentConfig.devicePlacement)
+            .put("orientation", currentConfig.orientation)
+            .put("target_duration_seconds", currentConfig.targetDurationSeconds)
+            .put("note", currentConfig.note)
             .put("started_at", formatEpoch(startedAtEpochMs))
             .put("ended_at", formatEpoch(endedAtEpochMs))
             .put("started_elapsed_realtime_ns", startedAtElapsedNs)
@@ -348,6 +431,17 @@ internal class SensorSessionRecorder(context: Context) {
             .put("accelerometer", sampleJson("m/s^2", accelerometerStats))
             .put("gyroscope", sampleJson("rad/s", gyroscopeStats))
         root.put("samples", samples)
+
+        val labels = JSONObject()
+            .put("file", "labels.csv")
+            .put("header", LABELS_HEADER)
+            .put("count", labelCount)
+            .put(
+                "clock",
+                "timestamp_elapsed_ns uses SystemClock.elapsedRealtimeNanos(), " +
+                    "the same boot-time clock as SensorEvent.timestamp",
+            )
+        root.put("labels", labels)
         root.put("error", recordingError ?: JSONObject.NULL)
 
         File(directory, "metadata.json").writeText(root.toString(2), Charsets.UTF_8)
@@ -376,12 +470,29 @@ internal class SensorSessionRecorder(context: Context) {
             .put("measured_hz", stats.measuredHz)
     }
 
+    private fun resolveAppVersion(): String {
+        return try {
+            val info = appContext.packageManager.getPackageInfo(appContext.packageName, 0)
+            info.versionName ?: "unknown"
+        } catch (_: Throwable) {
+            "unknown"
+        }
+    }
+
     private fun formatEpoch(epochMs: Long?): Any {
         if (epochMs == null || epochMs <= 0L) return JSONObject.NULL
         return SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS Z", Locale.US).format(Date(epochMs))
     }
 
+    private fun escapeCsv(value: String): String {
+        if (value.indexOf(',') < 0 && value.indexOf('"') < 0 && value.indexOf('\n') < 0) {
+            return value
+        }
+        return "\"" + value.replace("\"", "\"\"") + "\""
+    }
+
     private companion object {
         const val FLUSH_EVERY_ROWS = 200
+        const val LABELS_HEADER = "timestamp_elapsed_ns,wall_time_epoch_ms,label"
     }
 }

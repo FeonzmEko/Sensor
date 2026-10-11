@@ -371,3 +371,33 @@ analysis_outputs/<session_id>/
 - [ ] 归档包具有 SHA-256。
 - [ ] 至少完成两处备份。
 - [ ] `docs/tasks2.md` 的对应状态已更新。
+## 13. 工程迭代完成情况（2026-10-11）
+
+本清单的工程侧改造已完成，并在真实调试数据（`20261008_195431_052`，571.3 s 匀速步行）上跑通完整分析管道：
+
+### 13.1 已完成
+
+- [x] Android：`SessionConfig` 会话配置（路线/位置/朝向/目标时长/备注）；
+- [x] Android：`metadata.json` 扩展 `experiment`、`app_version`、`route_name`、`device_placement`、`orientation`、`target_duration_seconds`、`note`、`labels`；
+- [x] Android：新增 `labels.csv`（`timestamp_elapsed_ns,wall_time_epoch_ms,label`）与 `markEvent()` 事件打点；
+- [x] Android：采集中显示已采集时长 / 目标时长 / 是否达标 / 样本数 / 打点次数；
+- [x] Android：页面后台自动停止、flush、close 并写入 `completed`；采集期间保持屏幕常亮；
+- [x] 按用户明确要求，删除“打开二十行 Hello World”模块（Activity、布局、入口按钮、字符串、清单声明）；
+- [x] 清理两个 0 字节误生成文件 `当前状态：2026-10-08`、`当前状态：双传感器同步采集器已实现，并完成`；
+- [x] 移除未使用的 `navigation-fragment-ktx`、`navigation-ui-ktx` 依赖；
+- [x] 新增 Python 分析工程 `analysis/`（session/quality/windows/features_time/features_freq/experiment_d06/experiment_d07/bus_false_step/plotting/pipeline + 单元测试）；
+- [x] 生成 `analysis_outputs/20261008_195431_052/`：质量报告、标签解析、窗口表、窗口特征表、频谱缓存、7 张图表与 `report.md`；
+- [x] 新增 `docs/experiment2-report.md` 正式实验报告；
+- [x] `gradlew :app:assembleDebug` 与 `:app:testDebugUnitTest` 构建/测试通过；
+- [x] `pytest` 11 项单元测试全部通过。
+
+### 13.2 仍需真机/人工完成
+
+- [ ] 采集约 20 分钟、含步行 + 乘车（+ 静止/电梯）的日常路线数据；
+- [ ] 用真实乘车段替换仿真车辆振动参考信号，重新标定两个特征阈值；
+- [ ] D06/D07 课程页面截图与逐题作答；
+- [ ] 归档原始数据与派生结果、计算 SHA-256、完成至少两处备份；
+- [ ] 在 `docs/tasks2.md` 的验收标准中勾选最终数据相关条目。
+
+> 说明：第 3.1 节“保留 `HelloWorldActivity`”的要求与用户本次“删除‘打开二十行 Hello World’模块”的明确指令冲突，
+> 已按用户指令删除；`WaveformView`、采集器与已有真机证据均保留。

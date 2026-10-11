@@ -19,3 +19,21 @@ local.properties
 /tmp
 *.apk
 *.aab
+
+# --- Python analysis ---
+analysis/.venv/
+.venv/
+**/__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.ipynb_checkpoints/
+
+# --- 分析过程中的临时/中间文件（最终报告、关键图表和校验文件仍会提交） ---
+analysis_outputs/**/*.tmp
+analysis_outputs/**/spectrum_cache*/
+
+# --- 重复的原始会话目录（与 data/task3/raw 内容一致，避免重复提交） ---
+data/手持十分钟匀速/

@@ -1,0 +1,37 @@
+{
+  "window_seconds": 4.0,
+  "step_seconds": 2.0,
+  "fs_hz": 115.06203245747975,
+  "thresholds": {
+    "step_band_energy_ratio": 0.5,
+    "peak_interval_cv": 0.35
+  },
+  "walking": {
+    "source": "真实采集的步行数据",
+    "window_count": 284,
+    "ratio_mean": 0.8537762986029909,
+    "ratio_median": 0.8601321361086943,
+    "cv_mean": 0.05863573036840365,
+    "classified_walking_ratio": 1.0
+  },
+  "bus": {
+    "source": "仿真车辆振动参考信号（真实乘车段待 20 分钟路线采集后替换）",
+    "window_count": 39,
+    "ratio_mean": 0.020769783633507004,
+    "ratio_median": 0.019441410107738304,
+    "cv_mean": 0.2881984639433992,
+    "classified_walking_ratio": 0.0
+  },
+  "variance_only_baseline": {
+    "threshold_m_s2_squared": 8.293703663278144,
+    "walking_classified_walking_ratio": 0.12323943661971831,
+    "bus_classified_walking_ratio": 1.0,
+    "note": "车辆整体振动会让方差同样很大，只看方差会把大量乘车窗口误判为步行。"
+  },
+  "figure": "D:\\code\\Sensor\\analysis_outputs\\20261008_195431_052\\figures\\bus_features.png",
+  "conclusions": {
+    "feature_1": "步频带能量占比 R=P(0.5~3)/P(0.5~10)；步行能量集中在步频带，R 高。",
+    "feature_2": "峰间隔变异系数 CV=std/mean；步行节奏稳定，CV 低；车辆振动峰间隔杂乱，CV 高。",
+    "why_not_magnitude": "车辆整体振动可能让加速度方差同样很大，仅用“加速度大/方差大”会把乘车误判为步行。"
+  }
+}

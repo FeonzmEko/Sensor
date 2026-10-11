@@ -1,0 +1,169 @@
+{
+  "segment_seconds": 60.00241654475657,
+  "fs_hz": 115.06203245747975,
+  "window_sweep": [
+    {
+      "window_seconds": 0.25,
+      "step_seconds": 0.125,
+      "overlap_ratio": 0.5,
+      "window_count": 479,
+      "var_mean": 4.140817893491275,
+      "var_std": 2.4036780110691653,
+      "zcr_mean": 7.754265338234054,
+      "zcr_std": 4.203990085750067,
+      "peak_mean": 3.69229657654627,
+      "peak_max": 8.145468812723301
+    },
+    {
+      "window_seconds": 0.5,
+      "step_seconds": 0.25,
+      "overlap_ratio": 0.5,
+      "window_count": 239,
+      "var_mean": 6.640253798871917,
+      "var_std": 1.9123388158465697,
+      "zcr_mean": 5.673780534198409,
+      "zcr_std": 2.216014559556507,
+      "peak_mean": 4.9366873921934005,
+      "peak_max": 8.624645545658282
+    },
+    {
+      "window_seconds": 1.0,
+      "step_seconds": 0.5,
+      "overlap_ratio": 0.5,
+      "window_count": 119,
+      "var_mean": 6.67017617894505,
+      "var_std": 1.4841123854176874,
+      "zcr_mean": 5.723021656468626,
+      "zcr_std": 1.461347095829153,
+      "peak_mean": 5.442551474823137,
+      "peak_max": 8.696641872070284
+    },
+    {
+      "window_seconds": 2.0,
+      "step_seconds": 1.0,
+      "overlap_ratio": 0.5,
+      "window_count": 59,
+      "var_mean": 6.704531880645366,
+      "var_std": 1.2317239828497635,
+      "zcr_mean": 5.787880810397223,
+      "zcr_std": 1.1509287192528286,
+      "peak_mean": 5.919274242401263,
+      "peak_max": 8.692379928925021
+    },
+    {
+      "window_seconds": 4.0,
+      "step_seconds": 2.0,
+      "overlap_ratio": 0.5,
+      "window_count": 29,
+      "var_mean": 6.738271212937275,
+      "var_std": 1.014187948497812,
+      "zcr_mean": 5.792748249687056,
+      "zcr_std": 0.8638544558986165,
+      "peak_mean": 6.591648342348308,
+      "peak_max": 8.706155844648734
+    },
+    {
+      "window_seconds": 8.0,
+      "step_seconds": 4.0,
+      "overlap_ratio": 0.5,
+      "window_count": 14,
+      "var_mean": 6.750758101389911,
+      "var_std": 0.7016656647892412,
+      "zcr_mean": 5.79464527015646,
+      "zcr_std": 0.6246136430481425,
+      "peak_mean": 7.094664112489002,
+      "peak_max": 8.668032419061035
+    },
+    {
+      "window_seconds": 16.0,
+      "step_seconds": 8.0,
+      "overlap_ratio": 0.5,
+      "window_count": 6,
+      "var_mean": 6.721310200551341,
+      "var_std": 0.6617833544713603,
+      "zcr_mean": 5.749976635572046,
+      "zcr_std": 0.22821680495872976,
+      "peak_mean": 7.883973222135864,
+      "peak_max": 8.639260977754098
+    }
+  ],
+  "event_split": [
+    {
+      "window_seconds": 1.0,
+      "step_seconds": 1.0,
+      "step_mode": "S=W",
+      "max_event_coverage": 0.5,
+      "windows_touching_event": 2
+    },
+    {
+      "window_seconds": 1.0,
+      "step_seconds": 0.5,
+      "step_mode": "S=W/2",
+      "max_event_coverage": 0.8333333333333334,
+      "windows_touching_event": 5
+    },
+    {
+      "window_seconds": 1.5,
+      "step_seconds": 1.5,
+      "step_mode": "S=W",
+      "max_event_coverage": 0.5,
+      "windows_touching_event": 2
+    },
+    {
+      "window_seconds": 1.5,
+      "step_seconds": 0.75,
+      "step_mode": "S=W/2",
+      "max_event_coverage": 1.0,
+      "windows_touching_event": 3
+    },
+    {
+      "window_seconds": 2.0,
+      "step_seconds": 2.0,
+      "step_mode": "S=W",
+      "max_event_coverage": 0.5,
+      "windows_touching_event": 2
+    },
+    {
+      "window_seconds": 2.0,
+      "step_seconds": 1.0,
+      "step_mode": "S=W/2",
+      "max_event_coverage": 1.0,
+      "windows_touching_event": 3
+    },
+    {
+      "window_seconds": 3.0,
+      "step_seconds": 3.0,
+      "step_mode": "S=W",
+      "max_event_coverage": 0.5,
+      "windows_touching_event": 2
+    },
+    {
+      "window_seconds": 3.0,
+      "step_seconds": 1.5,
+      "step_mode": "S=W/2",
+      "max_event_coverage": 1.0,
+      "windows_touching_event": 3
+    },
+    {
+      "window_seconds": 4.0,
+      "step_seconds": 4.0,
+      "step_mode": "S=W",
+      "max_event_coverage": 1.0,
+      "windows_touching_event": 1
+    },
+    {
+      "window_seconds": 4.0,
+      "step_seconds": 2.0,
+      "step_mode": "S=W/2",
+      "max_event_coverage": 1.0,
+      "windows_touching_event": 3
+    }
+  ],
+  "figure": "D:\\code\\Sensor\\analysis_outputs\\20261008_195431_052\\figures\\d06_window_sweep.png",
+  "conclusions": {
+    "short_window": "极短窗（0.25~0.5 s）下方差和 ZCR 波动明显，噪声被放大。",
+    "long_window": "极长窗（8~16 s）方差被平均钝化，峰值更易被大冲击抬高。",
+    "non_overlap": "S=W 时 1.2 s 短事件跨缝会被劈开，单窗覆盖率下降。",
+    "overlap": "S=W/2 的 50% 重叠能提高短事件覆盖率，验证推荐工作点。"
+  }
+}

@@ -1,0 +1,63 @@
+{
+  "true_frequency_hz": 2.8,
+  "sample_rates_hz": [
+    50.0,
+    5.0,
+    3.0,
+    2.0
+  ],
+  "records": [
+    {
+      "fs_hz": 50.0,
+      "nyquist_hz": 25.0,
+      "true_frequency_hz": 2.8,
+      "f_peak_hz": 2.8000000000000003,
+      "step_frequency_spm": 168.00000000000003,
+      "resolution_hz": 0.1,
+      "folded_alias_hz": 2.8,
+      "mirror_about_fs_hz": 47.2
+    },
+    {
+      "fs_hz": 5.0,
+      "nyquist_hz": 2.5,
+      "true_frequency_hz": 2.8,
+      "f_peak_hz": 2.2,
+      "step_frequency_spm": 132.0,
+      "resolution_hz": 0.1,
+      "folded_alias_hz": 2.2,
+      "mirror_about_fs_hz": 2.8
+    },
+    {
+      "fs_hz": 3.0,
+      "nyquist_hz": 1.5,
+      "true_frequency_hz": 2.8,
+      "f_peak_hz": 0.2,
+      "step_frequency_spm": 12.0,
+      "resolution_hz": 0.1,
+      "folded_alias_hz": 0.20000000000000018,
+      "mirror_about_fs_hz": 2.8
+    },
+    {
+      "fs_hz": 2.0,
+      "nyquist_hz": 1.0,
+      "true_frequency_hz": 2.8,
+      "f_peak_hz": 0.8,
+      "step_frequency_spm": 48.0,
+      "resolution_hz": 0.1,
+      "folded_alias_hz": 0.7999999999999998,
+      "mirror_about_fs_hz": 1.2000000000000002
+    }
+  ],
+  "figure": "D:\\code\\Sensor\\analysis_outputs\\20261008_195431_052\\figures\\d07_alias.png",
+  "course_check": {
+    "expected_mirror_alias_hz": 1.2,
+    "observed_mirror_about_fs_hz": 1.2000000000000002,
+    "observed_standard_alias_hz": 0.7999999999999998,
+    "note": "标准奈奎斯特折叠把 2.8 Hz 在 fs=2 Hz 下折到 0.8 Hz；讲义页面给出的 1.2 Hz 是镜像值 fs-0.8。实验输出两者供对照。"
+  },
+  "conclusions": {
+    "folding_start": "当 fs=5 Hz 时奈奎斯特频率 2.5 Hz < 2.8 Hz，主峰开始折返到 2.2 Hz。",
+    "alias_chain": "现象：步数少算一半 → 指标：主峰降到 0.8/1.2 Hz → 谱：能量出现在混叠频率 → 采样率：fs=2 Hz 远低于 2×2.8 Hz。",
+    "nyquist_rule": "只有 fs > 2 × f_max 才不发生混叠；行人步频带按 3 Hz 计，fs 应大于 6 Hz。"
+  }
+}

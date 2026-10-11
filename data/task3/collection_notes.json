@@ -1,0 +1,9 @@
+{
+  "session_id": "20261008_195431_052",
+  "walking_method": "匀速步行",
+  "device_placement": "手持",
+  "orientation_recorded_explicitly": false,
+  "orientation_observation": "重力主要投影在设备 Z 轴，采集期间 Z 轴均值约为 +9.79 m/s²；该结论由数据推断，不等同于采集前书面记录的朝向。",
+  "duration_tolerance": "按用户确认，571.3 秒视为满足本次课程实验时长要求。",
+  "source_directory": "D:\\code\\Sensor\\data\\手持十分钟匀速"
+}

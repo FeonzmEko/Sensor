@@ -1,0 +1,287 @@
+{
+  "directory": "D:\\code\\Sensor\\data\\手持十分钟匀速",
+  "files": {
+    "accelerometer.csv": {
+      "size_bytes": 3102420,
+      "sha256": "5F38FD5BAAA4BD22254ACF05E5872C4467FA1D82D0C14AF673EA7343D04643B6"
+    },
+    "gyroscope.csv": {
+      "size_bytes": 1323232,
+      "sha256": "4D436C8D2B52432467340B2EE4B8E37AB6D7D73EA59D5383ECF6284E297F779C"
+    },
+    "metadata.json": {
+      "size_bytes": 1710,
+      "sha256": "276BFD8CB69F113409C904FADE58AB570A3AD567D6901A4976838AA0214C4C77"
+    }
+  },
+  "sensors": {
+    "accelerometer.csv": {
+      "header_ok": true,
+      "header": [
+        "timestamp_ns",
+        "x_m_s2",
+        "y_m_s2",
+        "z_m_s2"
+      ],
+      "sample_count": 65740,
+      "first_timestamp_ns": 536247280878360,
+      "last_timestamp_ns": 536818616171123,
+      "duration_seconds": 571.335292763,
+      "measured_hz": 115.06203245747975,
+      "strictly_monotonic": true,
+      "duplicate_count": 0,
+      "regression_count": 0,
+      "interval_us_min": 8689.74,
+      "interval_us_median": 8690.938,
+      "interval_us_p95": 8691.666,
+      "interval_us_p99": 8691.719,
+      "interval_us_max": 8692.136,
+      "gaps_over_2x_median": 0,
+      "gaps_over_3x_median": 0,
+      "gaps_over_100ms": 0,
+      "vector_mean": 9.904846221575431,
+      "vector_stddev": 2.593337934289774,
+      "vector_min": 2.833204651286915,
+      "vector_max": 18.957206675324517,
+      "vector_p01": 5.132413547861163,
+      "vector_p99": 15.652660360356911,
+      "axes": {
+        "x": {
+          "mean": -0.023708053319151202,
+          "stddev": 0.9255116022195216,
+          "min": -4.0761733,
+          "max": 6.131608
+        },
+        "y": {
+          "mean": 0.41064196148174203,
+          "stddev": 1.0617367945608416,
+          "min": -4.854439,
+          "max": 4.039683
+        },
+        "z": {
+          "mean": 9.794015992065713,
+          "stddev": 2.5991509041522516,
+          "min": 1.3842479,
+          "max": 18.583857
+        }
+      },
+      "first_row": [
+        536247280878360.0,
+        -3.4995031,
+        1.3310076,
+        9.424132
+      ],
+      "last_row": [
+        536818616171123.0,
+        -1.7455641,
+        2.2354946,
+        8.921639
+      ],
+      "first_20s": {
+        "sample_count": 2302,
+        "duration_seconds": 19.999589323,
+        "vector_mean": 9.87099779013956,
+        "vector_stddev": 2.214062981596072,
+        "axis_means": [
+          -0.20728579773379668,
+          0.6250074568899913,
+          9.775675256516072
+        ],
+        "axis_stddevs": [
+          0.8147590740861231,
+          0.8351763621217754,
+          2.2315671423442973
+        ]
+      },
+      "last_10s": {
+        "sample_count": 1151,
+        "duration_seconds": 9.993901041,
+        "vector_mean": 9.8358013077448,
+        "vector_stddev": 2.1967742435274573,
+        "axis_means": [
+          -0.07920326143240661,
+          1.1355424638950478,
+          9.686756216507385
+        ],
+        "axis_stddevs": [
+          0.8752144872351783,
+          0.8599616336340842,
+          2.2213271237024497
+        ]
+      }
+    },
+    "gyroscope.csv": {
+      "header_ok": true,
+      "header": [
+        "timestamp_ns",
+        "x_rad_s",
+        "y_rad_s",
+        "z_rad_s"
+      ],
+      "sample_count": 26295,
+      "first_timestamp_ns": 536247295584610,
+      "last_timestamp_ns": 536818596112582,
+      "duration_seconds": 571.300527972,
+      "measured_hz": 46.024813058266055,
+      "strictly_monotonic": true,
+      "duplicate_count": 0,
+      "regression_count": 0,
+      "interval_us_min": 21725.261,
+      "interval_us_median": 21727.395,
+      "interval_us_p95": 21729.114,
+      "interval_us_p99": 21729.271,
+      "interval_us_max": 21729.636,
+      "gaps_over_2x_median": 0,
+      "gaps_over_3x_median": 0,
+      "gaps_over_100ms": 0,
+      "vector_mean": 0.4812602344143562,
+      "vector_stddev": 0.23326165172400665,
+      "vector_min": 0.014941233316303223,
+      "vector_max": 1.8308316888992364,
+      "vector_p01": 0.09546863055069131,
+      "vector_p99": 1.199407756725216,
+      "axes": {
+        "x": {
+          "mean": -0.005475585496851112,
+          "stddev": 0.2910407972807703,
+          "min": -1.434005,
+          "max": 1.3817761
+        },
+        "y": {
+          "mean": -0.0001473440202502377,
+          "stddev": 0.2735967784375881,
+          "min": -1.519068,
+          "max": 1.3529128
+        },
+        "z": {
+          "mean": 0.00275508843497471,
+          "stddev": 0.35556275716284125,
+          "min": -1.714392,
+          "max": 1.4509566
+        }
+      },
+      "first_row": [
+        536247295584610.0,
+        0.10415245,
+        -0.881936,
+        0.08796453
+      ],
+      "last_row": [
+        536818596112582.0,
+        -0.20204352,
+        0.1301142,
+        0.08032872
+      ],
+      "first_20s": {
+        "sample_count": 921,
+        "duration_seconds": 19.990897552,
+        "vector_mean": 0.41348593236986775,
+        "vector_stddev": 0.212428274580231,
+        "axis_means": [
+          -0.0030631123781758953,
+          -0.01480368740364821,
+          -0.04572283101107492
+        ],
+        "axis_stddevs": [
+          0.26048576002341123,
+          0.3002333702033454,
+          0.23618715303002
+        ]
+      },
+      "last_10s": {
+        "sample_count": 461,
+        "duration_seconds": 9.993901094,
+        "vector_mean": 0.44245086156703084,
+        "vector_stddev": 0.2224816151198597,
+        "axis_means": [
+          0.002265235041084599,
+          0.016054414927765725,
+          -0.0032544111249457695
+        ],
+        "axis_stddevs": [
+          0.2574648229427949,
+          0.29820955524987863,
+          0.29961691099171917
+        ]
+      }
+    }
+  },
+  "metadata": {
+    "schema_version": 1,
+    "session_id": "20261008_195431_052",
+    "status": "completed",
+    "stop_reason": "用户手动停止",
+    "started_at": "2026-10-08 19:54:31.052 +0800",
+    "ended_at": "2026-10-08 20:04:02.380 +0800",
+    "started_elapsed_realtime_ns": 536247298462782,
+    "ended_elapsed_realtime_ns": 536818626555064,
+    "sample_clock": "SensorEvent.timestamp, nanoseconds, same boot-time clock for both sensors",
+    "coordinate_system": "Android device body frame X/Y/Z",
+    "device": {
+      "manufacturer": "Xiaomi",
+      "model": "25019PNF3C",
+      "device": "xuanyuan",
+      "android_release": "17",
+      "android_sdk": 37
+    },
+    "sensors": {
+      "accelerometer": {
+        "name": "lsm6dsv Accelerometer Non-wakeup",
+        "vendor": "STMicro",
+        "version": 28676,
+        "type": 1,
+        "max_range": 156.9064,
+        "resolution": 0.0047856453,
+        "min_delay_us": 5000,
+        "reporting_mode": 0
+      },
+      "gyroscope": {
+        "name": "lsm6dsv Gyroscope Non-wakeup",
+        "vendor": "STMicro",
+        "version": 28676,
+        "type": 4,
+        "max_range": 34.906036,
+        "resolution": 0.0012217296,
+        "min_delay_us": 5000,
+        "reporting_mode": 0
+      }
+    },
+    "samples": {
+      "accelerometer": {
+        "unit": "m/s^2",
+        "sample_count": 65740,
+        "first_timestamp_ns": 536247280878360,
+        "last_timestamp_ns": 536818616171123,
+        "duration_seconds": 571.335292763,
+        "measured_hz": 115.06203245747975
+      },
+      "gyroscope": {
+        "unit": "rad/s",
+        "sample_count": 26295,
+        "first_timestamp_ns": 536247295584610,
+        "last_timestamp_ns": 536818596112582,
+        "duration_seconds": 571.300527972,
+        "measured_hz": 46.024813058266055
+      }
+    },
+    "error": null
+  },
+  "collection_notes": {
+    "walking_method": "匀速步行",
+    "device_placement": "手持",
+    "orientation_recorded_explicitly": false,
+    "orientation_observation": "重力主要投影在设备 Z 轴，采集期间 Z 轴均值约为 +9.79 m/s²；该结论由数据推断，不等同于采集前书面记录的朝向。",
+    "duration_tolerance": "按用户确认，571.3 秒视为满足本次课程实验时长要求。"
+  },
+  "quality_checks": {
+    "headers_ok": true,
+    "both_sensors_nonempty": true,
+    "timestamps_strictly_monotonic": true,
+    "no_duplicate_timestamps": true,
+    "no_timestamp_regressions": true,
+    "no_gaps_over_100ms": true,
+    "accelerometer_unit_and_scale_plausible": true,
+    "gyroscope_finite_and_within_range": true
+  },
+  "all_automated_checks_passed": true
+}

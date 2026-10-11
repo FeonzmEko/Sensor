@@ -1,7 +1,6 @@
 package com.example.sensorlog
 
 import android.annotation.SuppressLint
-import android.content.Intent
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -10,7 +9,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.os.SystemClock
+import android.view.View
 import android.view.WindowManager
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -21,8 +23,10 @@ import java.util.Locale
 import kotlin.math.sqrt
 
 /**
- * 多元感知融合 · 第 2 节课后任务②：实时加速度波形。
- * 第 3 项任务在保留波形的基础上，同步记录加速度计与陀螺仪的原始采样。
+ * 多元感知融合 · 第 2 节课后任务：实时波形 + 双传感器原始采集。
+ *
+ * 采集前填写路线、手机位置、朝向和目标时长；采集中可以打事件标签，
+ * 并实时显示已采集时长、样本数与是否达到目标时长。
  */
 class MainActivity : AppCompatActivity() {
 
@@ -73,11 +77,12 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         recorder = SensorSessionRecorder(this)
 
-        binding.helloWorldBtn.setOnClickListener {
-            startActivity(Intent(this, HelloWorldActivity::class.java))
-        }
+        setupConfigInputs()
+        setupEventInputs()
+
         binding.startRecordingBtn.setOnClickListener { startRecording() }
-        binding.stopRecordingBtn.setOnClickListener { stopRecording("用户手动停止") }
+        binding.stopRecordingBtn.setOnClickListener { stopRecording(getString(R.string.stop_reason_manual)) }
+        binding.markEventBtn.setOnClickListener { markEvent() }
 
         ViewCompat.setOnApplyWindowInsetsListener(binding.main) { view, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -90,6 +95,36 @@ class MainActivity : AppCompatActivity() {
         binding.sensorsTv.text = "设备传感器清单：\n" +
             sensors.joinToString("\n") { "· ${it.name}  [${it.vendor}]" }
         updateRecordingButtons()
+    }
+
+    private fun setupConfigInputs() {
+        binding.targetDurationEt.setText(SessionConfig.DEFAULT_TARGET_DURATION_SECONDS.toString())
+        binding.placementSpinner.adapter = spinnerAdapter(R.array.device_placement_options)
+        binding.orientationSpinner.adapter = spinnerAdapter(R.array.orientation_options)
+    }
+
+    private fun setupEventInputs() {
+        binding.eventPresetSpinner.adapter = spinnerAdapter(R.array.event_preset_options)
+        binding.eventPresetSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(
+                parent: AdapterView<*>?,
+                view: View?,
+                position: Int,
+                id: Long,
+            ) {
+                val preset = parent?.getItemAtPosition(position)?.toString().orEmpty()
+                if (preset.isNotEmpty() && preset != getString(R.string.event_preset_custom)) {
+                    binding.eventLabelEt.setText(preset)
+                }
+            }
+
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+    }
+
+    private fun spinnerAdapter(arrayRes: Int): ArrayAdapter<CharSequence> {
+        return ArrayAdapter.createFromResource(this, arrayRes, android.R.layout.simple_spinner_item)
+            .apply { setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item) }
     }
 
     private fun onAccelerometer(event: SensorEvent) {
@@ -156,13 +191,39 @@ class MainActivity : AppCompatActivity() {
 
         if (recorder.isRecording()) {
             val snapshot = recorder.snapshot()
-            binding.recordingStatusTv.text = String.format(
-                Locale.US,
-                "正在采集：加计 %d 点｜陀螺 %d 点%s",
-                snapshot.accelerometerCount,
-                snapshot.gyroscopeCount,
-                snapshot.error?.let { "\n写入异常：$it" }.orEmpty(),
-            )
+            val elapsed = formatDuration(snapshot.elapsedSeconds)
+            val target = formatDuration(snapshot.targetDurationSeconds.toDouble())
+            val progress = if (snapshot.targetReached) "已达到目标时长" else "未达到目标时长"
+            binding.recordingStatusTv.text = buildString {
+                append("正在采集：已采集 $elapsed / 目标 $target（$progress）")
+                append("\n加速度计 ${snapshot.accelerometerCount} 点｜陀螺仪 ${snapshot.gyroscopeCount} 点")
+                append("｜事件打点 ${snapshot.labelCount} 次")
+                snapshot.error?.let { append("\n写入异常：$it") }
+            }
+        }
+    }
+
+    private fun markEvent() {
+        if (!recorder.isRecording()) {
+            binding.recordingStatusTv.text = "尚未开始采集，无法打点。"
+            return
+        }
+        val custom = binding.eventLabelEt.text.toString().trim()
+        val preset = binding.eventPresetSpinner.selectedItem?.toString().orEmpty()
+        val label = custom.ifEmpty {
+            if (preset == getString(R.string.event_preset_custom)) "" else preset
+        }
+        if (label.isEmpty()) {
+            binding.recordingStatusTv.text = "请输入事件标签，或从下拉列表中选择一个预设标签。"
+            return
+        }
+
+        val ok = recorder.markEvent(label)
+        val snapshot = recorder.snapshot()
+        binding.recordingStatusTv.text = if (ok) {
+            "已打点：$label（累计 ${snapshot.labelCount} 次）"
+        } else {
+            "打点失败：当前没有进行中的采集会话。"
         }
     }
 
@@ -175,10 +236,31 @@ class MainActivity : AppCompatActivity() {
             return
         }
 
+        val routeName = binding.routeNameEt.text.toString().trim()
+        if (routeName.isEmpty()) {
+            binding.recordingStatusTv.text = "无法开始：请先填写路线名称。"
+            return
+        }
+        val placement = binding.placementSpinner.selectedItem?.toString().orEmpty()
+        val orientation = binding.orientationSpinner.selectedItem?.toString().orEmpty()
+        val targetDurationSeconds = binding.targetDurationEt.text.toString().toIntOrNull()
+            ?.coerceAtLeast(1)
+            ?: SessionConfig.DEFAULT_TARGET_DURATION_SECONDS
+
+        val sessionConfig = SessionConfig(
+            routeName = routeName,
+            devicePlacement = placement,
+            orientation = orientation,
+            targetDurationSeconds = targetDurationSeconds,
+            note = binding.noteEt.text.toString().trim(),
+        )
+
         try {
-            val directory = recorder.start(accelerometer, gyroscope)
+            val directory = recorder.start(accelerometer, gyroscope, sessionConfig)
             window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            binding.recordingStatusTv.text = "采集已开始，页面将保持常亮。\n会话目录：${directory.absolutePath}"
+            binding.recordingStatusTv.text =
+                "采集已开始，页面将保持常亮。\n会话目录：${directory.absolutePath}"
+            binding.collectFormContainer.visibility = View.GONE
         } catch (t: Throwable) {
             window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             binding.recordingStatusTv.text = "采集启动失败：${t.message ?: t.javaClass.simpleName}"
@@ -195,10 +277,12 @@ class MainActivity : AppCompatActivity() {
             binding.recordingStatusTv.text = buildString {
                 append("采集完成：加计 ${summary.accelerometer.sampleCount} 点（$accelerometerHz Hz）")
                 append("｜陀螺 ${summary.gyroscope.sampleCount} 点（$gyroscopeHz Hz）")
+                append("｜事件打点 ${summary.labelCount} 次")
                 append("\n目录：${summary.directory.absolutePath}")
                 summary.error?.let { append("\n异常：$it") }
             }
         }
+        binding.collectFormContainer.visibility = View.VISIBLE
         updateRecordingButtons()
     }
 
@@ -207,6 +291,14 @@ class MainActivity : AppCompatActivity() {
         val bothSensorsAvailable = accelerometer != null && gyroscope != null
         binding.startRecordingBtn.isEnabled = bothSensorsAvailable && !recording
         binding.stopRecordingBtn.isEnabled = recording
+        binding.markEventBtn.isEnabled = recording
+    }
+
+    private fun formatDuration(totalSeconds: Double): String {
+        val whole = totalSeconds.toLong().coerceAtLeast(0L)
+        val minutes = whole / 60
+        val seconds = whole % 60
+        return String.format(Locale.US, "%02d:%02d", minutes, seconds)
     }
 
     override fun onResume() {
@@ -222,7 +314,7 @@ class MainActivity : AppCompatActivity() {
             sm.registerListener(listener, it, SensorManager.SENSOR_DELAY_GAME, uiHandler)
         }
 
-        binding.titleTv.text = "实时传感器 · 加计 + 陀螺"
+        binding.titleTv.text = getString(R.string.main_title)
         binding.sensorNamesTv.text = buildString {
             append("加速度计：${accelerometer?.name ?: "不可用"}")
             append("\n陀螺仪：${gyroscope?.name ?: "不可用"}")
@@ -234,7 +326,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         if (recorder.isRecording()) {
-            stopRecording("Activity paused")
+            stopRecording(getString(R.string.stop_reason_paused))
         }
         sm.unregisterListener(listener)
         uiHandler.removeCallbacks(uiTick)

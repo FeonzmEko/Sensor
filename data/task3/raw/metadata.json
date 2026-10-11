@@ -1,0 +1,60 @@
+{
+  "schema_version": 1,
+  "session_id": "20261008_195431_052",
+  "status": "completed",
+  "stop_reason": "用户手动停止",
+  "started_at": "2026-10-08 19:54:31.052 +0800",
+  "ended_at": "2026-10-08 20:04:02.380 +0800",
+  "started_elapsed_realtime_ns": 536247298462782,
+  "ended_elapsed_realtime_ns": 536818626555064,
+  "sample_clock": "SensorEvent.timestamp, nanoseconds, same boot-time clock for both sensors",
+  "coordinate_system": "Android device body frame X\/Y\/Z",
+  "device": {
+    "manufacturer": "Xiaomi",
+    "model": "25019PNF3C",
+    "device": "xuanyuan",
+    "android_release": "17",
+    "android_sdk": 37
+  },
+  "sensors": {
+    "accelerometer": {
+      "name": "lsm6dsv Accelerometer Non-wakeup",
+      "vendor": "STMicro",
+      "version": 28676,
+      "type": 1,
+      "max_range": 156.9064,
+      "resolution": 0.0047856453,
+      "min_delay_us": 5000,
+      "reporting_mode": 0
+    },
+    "gyroscope": {
+      "name": "lsm6dsv Gyroscope Non-wakeup",
+      "vendor": "STMicro",
+      "version": 28676,
+      "type": 4,
+      "max_range": 34.906036,
+      "resolution": 0.0012217296,
+      "min_delay_us": 5000,
+      "reporting_mode": 0
+    }
+  },
+  "samples": {
+    "accelerometer": {
+      "unit": "m\/s^2",
+      "sample_count": 65740,
+      "first_timestamp_ns": 536247280878360,
+      "last_timestamp_ns": 536818616171123,
+      "duration_seconds": 571.335292763,
+      "measured_hz": 115.06203245747975
+    },
+    "gyroscope": {
+      "unit": "rad\/s",
+      "sample_count": 26295,
+      "first_timestamp_ns": 536247295584610,
+      "last_timestamp_ns": 536818596112582,
+      "duration_seconds": 571.300527972,
+      "measured_hz": 46.024813058266055
+    }
+  },
+  "error": null
+}

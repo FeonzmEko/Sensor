@@ -1,5 +1,54 @@
 <resources>
     <string name="app_name">SensorLog</string>
-    <string name="hello_world_title">Sensor Hello World</string>
-    <string name="hello_world_open">打开二十行 Hello World</string>
+    <string name="main_title">多元感知融合 · 采集与特征工程</string>
+    <string name="status_waiting">等待传感器数据…</string>
+    <string name="collect_form_title">采集配置（开始前填写，写入 metadata.json）</string>
+    <string name="route_name_hint">路线名称，例如：宿舍→食堂→教学楼</string>
+    <string name="device_placement_label">手机位置</string>
+    <string name="orientation_label">手机朝向</string>
+    <string name="note_hint">备注，例如：兜里 / 手持 / 腰包 / 车内支架</string>
+    <string name="target_duration_label">目标时长</string>
+    <string name="target_duration_hint">1200</string>
+    <string name="target_duration_unit">秒</string>
+    <string name="start_recording">开始采集</string>
+    <string name="stop_recording">停止采集</string>
+    <string name="event_label_hint">事件标签（保留输入，可重复打点）</string>
+    <string name="mark_event">打点</string>
+    <string name="recording_status_idle">尚未开始采集。正式采集时请保持本页面在前台，采集期间屏幕常亮。</string>
+    <string name="sensor_names_placeholder">加速度计：检测中…\n陀螺仪：检测中…</string>
+    <string name="waveform_caption">实时加速度波形 · 红X 绿Y 蓝Z（纵轴 m/s²，窗口 8 s）｜平放静止时 Z≈9.8</string>
+    <string name="values_placeholder">加速度（m/s²）：X=0.00  Y=0.00  Z=0.00  |a|=0.00\n陀螺仪（rad/s）：X=0.000  Y=0.000  Z=0.000  |ω|=0.000</string>
+    <string name="footer_note">说明：GAME 档位申请，实际频率以文件时间戳实测为准；e.values 为机体系分量；页面进入后台时会自动停止采集、flush 并写入 metadata.json 与 labels.csv。</string>
+    <string name="event_preset_custom">自定义</string>
+    <string name="stop_reason_manual">用户手动停止</string>
+    <string name="stop_reason_paused">Activity paused</string>
+
+    <string-array name="device_placement_options">
+        <item>手持</item>
+        <item>裤兜</item>
+        <item>腰包</item>
+        <item>背包</item>
+        <item>车内支架</item>
+        <item>其他</item>
+    </string-array>
+
+    <string-array name="orientation_options">
+        <item>屏幕朝上平放</item>
+        <item>屏幕朝下平放</item>
+        <item>竖直握持，屏幕朝向身体</item>
+        <item>竖直握持，屏幕朝外</item>
+        <item>不确定</item>
+    </string-array>
+
+    <string-array name="event_preset_options">
+        <item>开始步行</item>
+        <item>结束步行</item>
+        <item>上车</item>
+        <item>下车</item>
+        <item>进入电梯</item>
+        <item>离开电梯</item>
+        <item>静止</item>
+        <item>到达</item>
+        <item>自定义</item>
+    </string-array>
 </resources>

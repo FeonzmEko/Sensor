@@ -15,7 +15,7 @@
             android:id="@+id/titleTv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="多元感知融合 · 传感器监听器"
+            android:text="@string/main_title"
             android:textSize="18sp"
             android:textStyle="bold" />
 
@@ -25,16 +25,122 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:fontFamily="monospace"
-            android:text="等待传感器数据…"
+            android:text="@string/status_waiting"
             android:textSize="13sp" />
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/helloWorldBtn"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:id="@+id/collectFormContainer"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/hello_world_open" />
+            android:layout_marginTop="10dp"
+            android:background="#11000000"
+            android:orientation="vertical"
+            android:padding="10dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/collect_form_title"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <EditText
+                android:id="@+id/routeNameEt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:hint="@string/route_name_hint"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/device_placement_label"
+                    android:textSize="13sp" />
+
+                <Spinner
+                    android:id="@+id/placementSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/orientation_label"
+                    android:textSize="13sp" />
+
+                <Spinner
+                    android:id="@+id/orientationSpinner"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1" />
+            </LinearLayout>
+
+            <EditText
+                android:id="@+id/noteEt"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:hint="@string/note_hint"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="2"
+                android:textSize="13sp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:text="@string/target_duration_label"
+                    android:textSize="13sp" />
+
+                <EditText
+                    android:id="@+id/targetDurationEt"
+                    android:layout_width="96dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:hint="@string/target_duration_hint"
+                    android:importantForAutofill="no"
+                    android:inputType="number"
+                    android:maxLines="1"
+                    android:textSize="13sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_marginStart="6dp"
+                    android:text="@string/target_duration_unit"
+                    android:textSize="13sp" />
+            </LinearLayout>
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -48,7 +154,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:enabled="false"
-                android:text="开始采集" />
+                android:text="@string/start_recording" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/stopRecordingBtn"
@@ -58,8 +164,42 @@
                 android:layout_marginStart="8dp"
                 android:layout_weight="1"
                 android:enabled="false"
-                android:text="停止采集" />
+                android:text="@string/stop_recording" />
         </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:orientation="horizontal">
+
+            <Spinner
+                android:id="@+id/eventPresetSpinner"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <EditText
+                android:id="@+id/eventLabelEt"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_weight="1.4"
+                android:hint="@string/event_label_hint"
+                android:importantForAutofill="no"
+                android:inputType="text"
+                android:maxLines="1"
+                android:textSize="13sp" />
+        </LinearLayout>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/markEventBtn"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:enabled="false"
+            android:text="@string/mark_event" />
 
         <TextView
             android:id="@+id/recordingStatusTv"
@@ -69,7 +209,7 @@
             android:background="#11000000"
             android:fontFamily="monospace"
             android:padding="8dp"
-            android:text="尚未开始采集。正式采集时请保持本页面在前台。"
+            android:text="@string/recording_status_idle"
             android:textSize="12sp" />
 
         <TextView
@@ -78,7 +218,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:fontFamily="monospace"
-            android:text="加速度计：检测中…\n陀螺仪：检测中…"
+            android:text="@string/sensor_names_placeholder"
             android:textSize="12sp" />
 
         <com.example.sensorlog.WaveformView
@@ -91,7 +231,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:text="实时加速度波形 · 红X 绿Y 蓝Z（纵轴 m/s²，窗口 8 s）｜平放静止时 Z≈9.8"
+            android:text="@string/waveform_caption"
             android:textSize="11sp" />
 
         <TextView
@@ -100,7 +240,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:fontFamily="monospace"
-            android:text="加速度（m/s²）：X=0.00  Y=0.00  Z=0.00  |a|=0.00\n陀螺仪（rad/s）：X=0.000  Y=0.000  Z=0.000  |ω|=0.000"
+            android:text="@string/values_placeholder"
             android:textSize="13sp" />
 
         <TextView
@@ -115,7 +255,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:text="说明：GAME 档位申请，实际频率以文件时间戳实测为准；e.values 为机体系分量；页面进入后台时会自动停止并关闭文件。"
+            android:text="@string/footer_note"
             android:textSize="11sp" />
     </LinearLayout>
 </ScrollView>
