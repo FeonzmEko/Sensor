@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import Sequence
 
 import matplotlib
 
@@ -12,6 +13,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
+from .features_freq import single_sided_spectrum
 from .session import SensorStream
 
 # 让中文标题在常见字体下可显示，缺失时回退到英文字体而不报错。
@@ -161,26 +163,77 @@ def plot_d07(records: list[dict[str, object]], out_path: str | Path) -> Path:
     return _save(fig, out_path)
 
 
+def plot_gait_vs_vehicle(
+    groups: Sequence[tuple[str, np.ndarray, np.ndarray, float]],
+    out_path: str | Path,
+    band: tuple[float, float] = (0.5, 3.0),
+    max_frequency_hz: float = 12.0,
+) -> Path:
+    """两段数据的时域 / 频域并排对照。
+
+    `groups` 每项为 (名称, 时间轴 / s, 合矢量信号 / m/s², 采样率 / Hz)。
+    上图给出时域波形，下图给出完整的单边幅度谱（不截断到步频带），
+    用于直观显示“时域幅度同量级、能量分布完全不同”。
+    """
+    assert len(groups) == 2, "该图固定对比两段数据"
+    fig, axes = plt.subplots(2, 2, figsize=(13, 7), constrained_layout=True)
+    for column, (name, time_seconds, signal, fs) in enumerate(groups):
+        axis_time = axes[0][column]
+        axis_time.plot(time_seconds, signal, linewidth=0.8, color="#1f77b4")
+        axis_time.set_title(f"{name}：合矢量时域")
+        axis_time.set_xlabel("窗内时间 / s")
+        axis_time.set_ylabel("|a| / (m/s²)")
+
+        freqs, amplitude = single_sided_spectrum(signal, fs)
+        axis_freq = axes[1][column]
+        axis_freq.plot(freqs, amplitude, linewidth=1.0, color="#d62728")
+        keep = freqs <= max_frequency_hz
+        axis_freq.axvspan(band[0], band[1], color="#2ca02c", alpha=0.15, label="步频带")
+        axis_freq.set_xlim(0.0, max_frequency_hz)
+        axis_freq.set_title(f"{name}：单边幅度谱")
+        axis_freq.set_xlabel("频率 / Hz")
+        axis_freq.set_ylabel("幅度")
+        axis_freq.legend(fontsize=8)
+        if np.any(keep):
+            peak_index = int(np.argmax(amplitude[keep]))
+            peak_frequency = float(freqs[keep][peak_index])
+            axis_freq.axvline(peak_frequency, color="black", linestyle="--", linewidth=0.9)
+            axis_freq.annotate(
+                f"主峰 {peak_frequency:.2f} Hz",
+                xy=(peak_frequency, float(amplitude[keep][peak_index])),
+                xytext=(8, -12),
+                textcoords="offset points",
+                fontsize=8,
+            )
+    return _save(fig, out_path)
+
 def plot_bus_features(
     walk_ratio: np.ndarray,
     walk_cv: np.ndarray,
     bus_ratio: np.ndarray,
     bus_cv: np.ndarray,
     out_path: str | Path,
+    extra_groups: Sequence[tuple[str, np.ndarray, np.ndarray]] = (),
+    walk_label: str = "步行（真实数据）",
 ) -> Path:
+    """步行 / 乘车（参考） / 其它真实非步行状态的特征对照散点图。"""
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.6))
-    axes[0].scatter(walk_ratio, walk_cv, label="步行（真实数据）", alpha=0.5, s=14)
+    axes[0].scatter(walk_ratio, walk_cv, label=walk_label, alpha=0.5, s=14)
     axes[0].scatter(bus_ratio, bus_cv, label="乘车（仿真参考）", alpha=0.5, s=14, marker="^")
+    for name, ratio, cv in extra_groups:
+        axes[0].scatter(ratio, cv, label=f"{name}（真实数据）", alpha=0.55, s=16, marker="s")
     axes[0].set_xlabel("步频带能量占比 P(0.5~3)/P(0.5~10)")
     axes[0].set_ylabel("峰间隔变异系数 std/mean")
     axes[0].set_title("步行 vs 乘车特征散点")
-    axes[0].legend()
+    axes[0].legend(fontsize=8)
 
     bins = np.linspace(0, 1, 21)
-    axes[1].hist(walk_ratio, bins=bins, alpha=0.6, label="步行")
+    axes[1].hist(walk_ratio, bins=bins, alpha=0.6, label=walk_label.split("（")[0])
     axes[1].hist(bus_ratio, bins=bins, alpha=0.6, label="乘车（仿真）")
+    for name, ratio, _cv in extra_groups:
+        axes[1].hist(ratio, bins=bins, alpha=0.45, label=name)
     axes[1].set_xlabel("步频带能量占比")
     axes[1].set_ylabel("窗口数")
     axes[1].set_title("能量占比分布")
-    axes[1].legend()
+    axes[1].legend(fontsize=8)
     return _save(fig, out_path)

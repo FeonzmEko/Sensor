@@ -6,7 +6,10 @@
     CV = std(步间隔) / mean(步间隔)
 
 只有当 R 足够高、CV 足够低时，才倾向于判定为步行；单纯“加速度大/方差大”
-无法区分步行与车辆振动，本模块用真实步行窗口与车辆振动参考信号验证。
+无法区分步行与车辆振动，本模块用真实步行窗口与两类负样本验证：
+
+1. 仿真车辆振动参考信号（发动机 / 路面振动，理想化对照）；
+2. 会话中真实打点的非步行状态（默认 `骑行`），用于暴露判据的真实失效边界。
 """
 
 from __future__ import annotations
@@ -17,8 +20,13 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from .features_freq import band_energy_ratio, build_frequency_feature_table, peak_interval_statistics
-from .plotting import plot_bus_features
+from .features_freq import (
+    band_energy_ratio,
+    build_frequency_feature_table,
+    peak_interval_statistics,
+)
+
+from .plotting import plot_bus_features, plot_gait_vs_vehicle
 from .session import SensorSession
 from .windows import WindowSpec, build_windows
 
@@ -44,6 +52,75 @@ def simulate_bus_vibration(
         + rng.normal(0.0, 1.0, time.size)
     )
     return signal
+
+
+#: 默认按这些真实状态分组统计两个特征；键是展示名，值是该组的原始状态集合。
+DEFAULT_STATE_GROUPS: dict[str, tuple[str, ...]] = {
+    "步行": ("步行",),
+    "楼梯": ("楼梯",),
+    "骑行": ("骑行",),
+    "电梯": ("电梯",),
+    "静止": ("静止",),
+}
+
+
+def state_group_pairs(
+    features: pd.DataFrame,
+    states: tuple[str, ...],
+) -> tuple[np.ndarray, np.ndarray]:
+    """从逐窗口特征表里取出某个真实状态分组的 (R, CV)。"""
+    if features is None or "state" not in features.columns:
+        return np.empty(0), np.empty(0)
+    subset = features[features["state"].isin(states)]
+    return _clean_pair(
+        subset["step_band_energy_ratio"].to_numpy(dtype=float),
+        subset["interval_cv"].to_numpy(dtype=float),
+    )
+
+
+def pick_state_window(
+    features: pd.DataFrame,
+    state: str,
+    column: str,
+) -> pd.Series | None:
+    """挑出某状态下 `column` 最接近中位数的窗口，作为该状态的代表样本。"""
+    if features is None or "state" not in features.columns or column not in features.columns:
+        return None
+    subset = features[features["state"] == state].dropna(subset=[column])
+    if subset.empty:
+        return None
+    target = float(subset[column].median())
+    return subset.iloc[int(np.abs(subset[column].to_numpy(dtype=float) - target).argmin())]
+
+
+def build_gait_vs_vehicle_figure(
+    session: SensorSession,
+    features: pd.DataFrame | None,
+    out_path: str | Path,
+    band: tuple[float, float] = (0.5, 3.0),
+    gait_state: str = "步行",
+    vehicle_state: str = "骑行",
+) -> Path | None:
+    """步行段与真实骑行段的时域 / 频域并排对照图。"""
+    if features is None:
+        return None
+    gait = pick_state_window(features, gait_state, "acc_mag_var")
+    vehicle = pick_state_window(features, vehicle_state, "step_band_energy_ratio")
+    if gait is None or vehicle is None:
+        return None
+
+    stream = session.accelerometer
+    magnitude = stream.magnitude()
+    time_axis = stream.time_seconds
+    groups: list[tuple[str, np.ndarray, np.ndarray, float]] = []
+    for name, row in ((f"{gait_state}（真实打点）", gait), (f"{vehicle_state}（真实打点）", vehicle)):
+        start = int(row["start_index"])
+        end = int(row["end_index"])
+        signal = magnitude[start:end]
+        window_seconds = float(row["end_seconds"]) - float(row["start_seconds"])
+        fs = signal.size / window_seconds if window_seconds > 0 else 0.0
+        groups.append((name, time_axis[start:end] - time_axis[start], signal, fs))
+    return plot_gait_vs_vehicle(groups, out_path, band=band)
 
 
 def window_feature_pairs(
@@ -95,16 +172,41 @@ def run_bus_experiment(
     step_seconds: float = 2.0,
     ratio_threshold: float = 0.5,
     cv_threshold: float = 0.35,
+    features: pd.DataFrame | None = None,
+    state_groups: dict[str, tuple[str, ...]] | None = None,
+    walking_states: tuple[str, ...] = ("步行",),
 ) -> dict[str, object]:
     out = Path(out_dir)
     (out / "figures").mkdir(parents=True, exist_ok=True)
 
     stream = session.accelerometer
     fs = stream.measured_hz or 100.0
-    walk_ratio, walk_cv = window_feature_pairs(
-        stream.magnitude(), fs, window_seconds, step_seconds
+
+    # 正样本优先取真实打点的步行窗口；没有标签时才退回“整段采集数据”。
+    walk_ratio, walk_cv = (
+        state_group_pairs(features, walking_states)
+        if features is not None
+        else (np.empty(0), np.empty(0))
     )
-    walk_ratio, walk_cv = _clean_pair(walk_ratio, walk_cv)
+    walk_var = np.empty(0)
+    if walk_ratio.size and features is not None:
+        walk_var = _clean(
+            features.loc[
+                features["state"].isin(walking_states), "acc_mag_var"
+            ].to_numpy(dtype=float)
+        )
+        walking_source = "真实打点状态 " + "、".join(walking_states)
+        walking_from_labels = True
+    else:
+        walk_ratio, walk_cv = window_feature_pairs(
+            stream.magnitude(), fs, window_seconds, step_seconds
+        )
+        walk_ratio, walk_cv = _clean_pair(walk_ratio, walk_cv)
+        walk_var = _clean(
+            window_variance(stream.magnitude(), fs, window_seconds, step_seconds)
+        )
+        walking_source = "整段采集数据（无打点标签，作为步行近似）"
+        walking_from_labels = False
 
     bus_signal = simulate_bus_vibration(fs=fs, duration_seconds=max(60.0, window_seconds * 20))
     bus_ratio, bus_cv = window_feature_pairs(bus_signal, fs, window_seconds, step_seconds)
@@ -119,7 +221,6 @@ def run_bus_experiment(
     bus_pred = classify(bus_ratio, bus_cv)
 
     # 对照基线：只用“方差大不大”判定步行。
-    walk_var = _clean(window_variance(stream.magnitude(), fs, window_seconds, step_seconds))
     bus_var = _clean(window_variance(bus_signal, fs, window_seconds, step_seconds))
     var_threshold = (
         float((np.median(walk_var) + np.median(bus_var)) / 2.0)
@@ -132,7 +233,56 @@ def run_bus_experiment(
         float(np.mean(bus_var_pred)) if bus_var.size else None
     )
 
-    figure = plot_bus_features(walk_ratio, walk_cv, bus_ratio, bus_cv, out / "figures" / "bus_features.png")
+    # 真实打点状态的分组统计：骑行等非步行段是这两个特征的真实失效边界。
+    real_groups: dict[str, dict[str, object]] = {}
+    plot_extras: list[tuple[str, np.ndarray, np.ndarray]] = []
+    for name, states in (state_groups or DEFAULT_STATE_GROUPS).items():
+        group_ratio, group_cv = state_group_pairs(features, states) if features is not None else (
+            np.empty(0),
+            np.empty(0),
+        )
+        if group_ratio.size == 0:
+            continue
+        group_pred = classify(group_ratio, group_cv)
+        group_var = np.empty(0)
+        if features is not None and "state" in features.columns:
+            group_var = _clean(
+                features.loc[features["state"].isin(states), "acc_mag_var"].to_numpy(dtype=float)
+            )
+        real_groups[name] = {
+            "states": list(states),
+            "window_count": int(group_ratio.size),
+            "ratio_median": float(np.median(group_ratio)),
+            "cv_mean": float(np.mean(group_cv)),
+            "classified_walking_ratio": float(np.mean(group_pred)),
+            "variance_median": float(np.median(group_var)) if group_var.size else None,
+            "variance_classified_walking_ratio": (
+                float(np.mean(group_var >= var_threshold))
+                if group_var.size and var_threshold
+                else None
+            ),
+        }
+        plot_extras.append((name, group_ratio, group_cv))
+
+    if walking_from_labels:
+        # 正样本已是真实打点状态，避免在图上重复画同一组窗口。
+        plot_extras = [item for item in plot_extras if item[0] not in walking_states]
+
+    gait_vehicle_figure = build_gait_vs_vehicle_figure(
+        session,
+        features,
+        out / "figures" / "walk_vs_bike_spectrum.png",
+    )
+
+    figure = plot_bus_features(
+        walk_ratio,
+        walk_cv,
+        bus_ratio,
+        bus_cv,
+        out / "figures" / "bus_features.png",
+        extra_groups=tuple(plot_extras),
+        walk_label="步行（真实打点状态）" if walking_from_labels else "步行（整段采集）",
+    )
 
     summary = {
         "window_seconds": window_seconds,
@@ -143,7 +293,7 @@ def run_bus_experiment(
             "peak_interval_cv": cv_threshold,
         },
         "walking": {
-            "source": "真实采集的步行数据",
+            "source": walking_source,
             "window_count": int(walk_ratio.size),
             "ratio_mean": float(np.mean(walk_ratio)) if walk_ratio.size else None,
             "ratio_median": float(np.median(walk_ratio)) if walk_ratio.size else None,
@@ -166,6 +316,8 @@ def run_bus_experiment(
             "bus_classified_walking_ratio": variance_only_false_positive,
             "note": "车辆整体振动会让方差同样很大，只看方差会把大量乘车窗口误判为步行。",
         },
+        "real_state_groups": real_groups,
+        "gait_vs_vehicle_figure": str(gait_vehicle_figure) if gait_vehicle_figure else None,
         "figure": str(figure),
         "conclusions": {
             "feature_1": "步频带能量占比 R=P(0.5~3)/P(0.5~10)；步行能量集中在步频带，R 高。",

@@ -244,30 +244,111 @@ def resample_uniform(
     return uniform_time, uniform_signal
 
 
+STATE_ALIASES: dict[str, str] = {
+    "上楼梯": "楼梯",
+    "下楼梯": "楼梯",
+    "楼梯": "楼梯",
+    "步行": "步行",
+    "慢走": "步行",
+    "快走": "步行",
+    "静止": "静止",
+    "电梯": "电梯",
+    "骑行": "骑行",
+}
+
+TRANSITION_STATE = "过渡"
+
+_START_PREFIXES: tuple[str, ...] = ("开始", "进入")
+_END_PREFIXES: tuple[str, ...] = ("结束", "离开")
+
+
+def normalize_event_label(label: str) -> tuple[str, str]:
+    """把原始打点标签归一化成 (状态名, 事件类型)。
+
+    事件类型 `kind` 取 `start` / `end`。这样 `开始步行` / `结束步行` 会归一到
+    同一个状态 `步行`，而不是被当成两个不同的状态。
+    """
+    text = (label or "").strip()
+    if not text:
+        return "unknown", "start"
+    for prefix in _END_PREFIXES:
+        if text.startswith(prefix) and len(text) > len(prefix):
+            name = text[len(prefix):]
+            return STATE_ALIASES.get(name, name), "end"
+    for prefix in _START_PREFIXES:
+        if text.startswith(prefix) and len(text) > len(prefix):
+            name = text[len(prefix):]
+            return STATE_ALIASES.get(name, name), "start"
+    return STATE_ALIASES.get(text, text), "start"
+
+
+def build_state_intervals(
+    events: Iterable[tuple[float, str, str]],
+    duration_seconds: float,
+) -> list[tuple[str, float, float]]:
+    """把打点事件转成 (状态, 起始秒, 结束秒) 的非重叠区间序列。
+
+    规则：
+    - `开始X` / `进入X` / 裸标签：进入状态 X；
+    - `结束X` / `离开X`：若 X 正开放则关闭，之后进入 `过渡`（未标注）直到下一次进入；
+    - 第一个事件之前是 `unknown`，最后一个事件之后继承当时的开放状态；
+    - 相邻同状态区间合并，零长区间丢弃。
+    """
+    ordered = sorted(events, key=lambda item: float(item[0]))
+    if not ordered:
+        # 没有打点标签时，整个会话退化为一个 unknown 区间，保持与原行为一致。
+        return [("unknown", 0.0, float(duration_seconds))] if duration_seconds > 0 else []
+
+    changes: list[tuple[float, str]] = []
+    current = "unknown"
+    for timestamp, label, _kind in ordered:
+        state, kind = normalize_event_label(label)
+        moment = float(timestamp)
+        if kind == "end":
+            if current != state:
+                continue
+            current = TRANSITION_STATE
+        else:
+            if current == state:
+                continue
+            current = state
+        changes.append((moment, current))
+
+    if not changes:
+        return []
+
+    intervals: list[tuple[str, float, float]] = []
+    if changes[0][0] > 0.0:
+        intervals.append(("unknown", 0.0, changes[0][0]))
+    for index, (start_time, state) in enumerate(changes):
+        end_time = changes[index + 1][0] if index + 1 < len(changes) else float(duration_seconds)
+        if end_time <= start_time:
+            continue
+        if intervals and intervals[-1][0] == state and abs(intervals[-1][2] - start_time) < 1e-9:
+            intervals[-1] = (state, intervals[-1][1], end_time)
+        else:
+            intervals.append((state, start_time, end_time))
+    return intervals
+
+
 def make_state_lookup(
     events: Iterable[tuple[float, str, str]],
     duration_seconds: float,
 ) -> Callable[[float], str]:
-    """根据事件标签生成 时间 -> 状态 的函数。
-
-    规则：
-    - 第一个事件之前：unknown；
-    - 两个相邻事件之间：继承前一个事件的状态（讲义允许）；
-    - 最后一个事件之后：继承最后一个事件的状态，直到会话结束。
-    """
-    ordered = sorted(events, key=lambda item: item[0])
+    """根据事件标签生成 时间 -> 状态 的函数（规则见 `build_state_intervals`）。"""
+    intervals = build_state_intervals(events, duration_seconds)
 
     def lookup(time_seconds: float) -> str:
-        if not ordered:
+        if not intervals:
             return "unknown"
-        if time_seconds < ordered[0][0]:
+        if time_seconds < intervals[0][1]:
             return "unknown"
-        state = ordered[0][1]
-        for timestamp, label, _kind in ordered:
-            if timestamp <= time_seconds:
-                state = label
-            else:
-                break
+        state = "unknown"
+        for name, start, end in intervals:
+            if start <= time_seconds < end:
+                return name
+            if time_seconds >= end:
+                state = name
         return state
 
     return lookup

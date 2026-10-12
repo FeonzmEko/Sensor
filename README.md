@@ -92,6 +92,12 @@ pip install -e ".[dev]"
 pytest                                 # 运行单元测试
 
 # 仓库根目录执行一键分析
+# 正式 21.2 分钟日常路线数据（步行 / 楼梯 / 电梯 / 静止 / 骑行）
+python -m sensor_analysis.pipeline \
+    --session "data/20261012_114607_166_20分钟楼梯步行电梯骑行" \
+    --out analysis_outputs/20261012_114607_166 --window 4 --step 2
+
+# 早期调试样本（571.3 s 手持匀速步行）
 python -m sensor_analysis.pipeline --session data/task3/raw \
     --out analysis_outputs/20261008_195431_052 --window 4 --step 2
 ```
@@ -103,6 +109,7 @@ analysis_outputs/<session_id>/
 ├── quality_report.json
 ├── labels_resolved.csv
 ├── windows.csv
+├── state_summary.csv            # 每状态特征汇总（动没动 / 动多快 / 动多大）
 ├── window_features.csv
 ├── window_frequency_features.csv
 ├── spectrum.npz
@@ -113,6 +120,7 @@ analysis_outputs/<session_id>/
 └── figures/
     ├── waveform.png / time_features.png / fft_spectrum.png / time_frequency.png
     ├── d06_window_sweep.png / d07_alias.png / bus_features.png
+    └── walk_vs_bike_spectrum.png  # 步行 vs 骑行时域 / 频域对照
 ```
 
 详见 [分析工程说明](analysis/README.md) 与 [第 2 课时实验报告](docs/experiment2-report.md)。
@@ -174,6 +182,7 @@ Gradle Version Catalog · Python（numpy / pandas / matplotlib / scipy / pytest�
 ## 相关文档
 
 - [第 2 课时任务清单](docs/tasks2.md)
+- [21.2 分钟采集证据（图表 / 质量报告 / 特征汇总）](docs/evidence/lesson2-20min/)
 - [工程代码刷新任务清单](docs/tasks-code-reflash.md)
 - [第 2 课时特征工程实验报告](docs/experiment2-report.md)
 - [任务 2 验证报告（实测采样频率）](docs/task2-verification.md)

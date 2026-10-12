@@ -8,7 +8,14 @@ from typing import Callable
 import numpy as np
 import pandas as pd
 
-from .session import NS_PER_SECOND, SensorSession, SensorStream, make_state_lookup
+from .session import (
+    NS_PER_SECOND,
+    TRANSITION_STATE,
+    SensorSession,
+    SensorStream,
+    build_state_intervals,
+    make_state_lookup,
+)
 
 
 @dataclass(frozen=True)
@@ -56,7 +63,8 @@ def resolve_state_lookup(
 
     输出同时包含：
     - record_type = raw_event：用户实际打点的原始事件；
-    - record_type = inferred_interval：按“相邻事件之间继承前一个状态”推断的区间。
+    - record_type = inferred_interval：由 `build_state_intervals` 解析出的非重叠状态区间
+      （`开始X` / `结束X` 归一到同一状态，未标注的过渡段记作 `过渡`）。
     """
     duration = session.duration_seconds
     events = session.label_events()
@@ -76,10 +84,13 @@ def resolve_state_lookup(
             }
         )
 
-    boundaries = [0.0] + [t for t, _label, _kind in events if 0.0 <= t <= duration] + [duration]
-    boundaries = sorted(set(boundaries))
-    for start, end in zip(boundaries[:-1], boundaries[1:]):
-        state = lookup((start + end) / 2.0)
+    for state, start, end in build_state_intervals(events, duration):
+        if state == "unknown":
+            source = "unknown"
+        elif state == TRANSITION_STATE:
+            source = "transition"
+        else:
+            source = "inferred_between_events"
         rows.append(
             {
                 "record_type": "inferred_interval",
@@ -88,7 +99,7 @@ def resolve_state_lookup(
                 "end_seconds": float(end),
                 "start_elapsed_ns": None,
                 "end_elapsed_ns": None,
-                "source": "inferred_between_events" if state != "unknown" else "unknown",
+                "source": source,
             }
         )
 

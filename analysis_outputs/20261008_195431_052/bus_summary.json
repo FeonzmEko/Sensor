@@ -7,7 +7,7 @@
     "peak_interval_cv": 0.35
   },
   "walking": {
-    "source": "真实采集的步行数据",
+    "source": "整段采集数据（无打点标签，作为步行近似）",
     "window_count": 284,
     "ratio_mean": 0.8537762986029909,
     "ratio_median": 0.8601321361086943,
@@ -28,6 +28,8 @@
     "bus_classified_walking_ratio": 1.0,
     "note": "车辆整体振动会让方差同样很大，只看方差会把大量乘车窗口误判为步行。"
   },
+  "real_state_groups": {},
+  "gait_vs_vehicle_figure": null,
   "figure": "D:\\code\\Sensor\\analysis_outputs\\20261008_195431_052\\figures\\bus_features.png",
   "conclusions": {
     "feature_1": "步频带能量占比 R=P(0.5~3)/P(0.5~10)；步行能量集中在步频带，R 高。",

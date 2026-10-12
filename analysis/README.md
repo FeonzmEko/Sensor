@@ -12,7 +12,7 @@ analysis/
 ├── pyproject.toml
 ├── README.md
 ├── src/sensor_analysis/
-│   ├── session.py          # 读取 CSV / metadata.json / labels.csv
+│   ├── session.py          # 读取 CSV / metadata.json / labels.csv + 状态标签归一化
 │   ├── quality.py          # 时间戳、间断、单位量级与标签映射检查
 │   ├── windows.py          # 滑窗与标签区间解析
 │   ├── features_time.py    # 均值 / 方差 / 过零率 / 峰值
@@ -24,7 +24,9 @@ analysis/
 │   └── pipeline.py         # 一键管道（命令行入口）
 └── tests/
     ├── test_time_features.py
-    └── test_frequency_features.py
+    ├── test_frequency_features.py
+    ├── test_bus_features.py
+    └── test_state_labels.py   # 开始X / 结束X 归一化与状态区间解析
 ```
 
 ## 环境与安装
@@ -62,6 +64,7 @@ sensor-analysis --session ../data/task3/raw --window 4 --step 2 --band-low 0.5 -
 analysis_outputs/<session_id>/
 ├── quality_report.json
 ├── labels_resolved.csv
+├── state_summary.csv                # 每状态特征汇总（时长、方差、ZCR、峰值、主峰、R、CV）
 ├── windows.csv
 ├── window_features.csv            # 时域四件套 + 频域特征合并表
 ├── window_frequency_features.csv
@@ -76,9 +79,16 @@ analysis_outputs/<session_id>/
 │   ├── time_frequency.png
 │   ├── d06_window_sweep.png
 │   ├── d07_alias.png
-│   └── bus_features.png
+│   ├── bus_features.png
+│   └── walk_vs_bike_spectrum.png    # 步行 vs 骑行：时域 + 完整单边谱（不截断到步频带）
 └── report.md
 ```
+
+## 状态标签约定
+
+打点标签支持成对事件：`开始X` / `进入X` 进入状态 X，`结束X` / `离开X` 关闭状态 X，
+两者归一到同一个状态名（例如 `开始步行` 与 `结束步行` 都是 `步行`）；
+关闭之后到下一次进入之前的未标注区间记为 `过渡`。`上楼梯` / `下楼梯` 都归一到 `楼梯`。
 
 ## 关键约定
 

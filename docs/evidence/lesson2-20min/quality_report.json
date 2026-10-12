@@ -1,0 +1,343 @@
+{
+  "directory": "D:\\code\\Sensor\\data\\20261012_114607_166_20分钟楼梯步行电梯骑行",
+  "session_id": "20261012_114607_166",
+  "files": {
+    "accelerometer.csv": {
+      "size_bytes": 6830680,
+      "sha256": "8075DA7F9E08F1ACF5390BDE5A36242B1D5D4D8DF7924BA4B8B7DC090ACED563"
+    },
+    "gyroscope.csv": {
+      "size_bytes": 2946431,
+      "sha256": "4BDA2EC01572E8040B887349EC1F743C72B514811DE2527D6127D2C4C672B0D8"
+    },
+    "metadata.json": {
+      "size_bytes": 2199,
+      "sha256": "9E9C10C1F5493392FAF867B7E46A5F5C9AF2F2244F7EE3C7B9AFB705E55421F5"
+    },
+    "labels.csv": {
+      "size_bytes": 636,
+      "sha256": "C950A142E6DFC339DF5C311DDBBE3D35D762BEA7F30D07F9BEACFF323937252A"
+    }
+  },
+  "sensors": {
+    "accelerometer": {
+      "header_ok": true,
+      "header": [
+        "timestamp_ns",
+        "x_m_s2",
+        "y_m_s2",
+        "z_m_s2"
+      ],
+      "sample_count": 146266,
+      "first_timestamp_ns": 852543395092371,
+      "last_timestamp_ns": 853814840245536,
+      "duration_seconds": 1271.445153165,
+      "measured_hz": 115.03838733106458,
+      "strictly_monotonic": true,
+      "duplicate_count": 0,
+      "regression_count": 0,
+      "gaps_over_2x_median": 0,
+      "gaps_over_3x_median": 0,
+      "gaps_over_100ms": 0,
+      "vector_mean": 9.919205931680303,
+      "vector_stddev": 2.918976193379455,
+      "vector_min": 0.28263239807098894,
+      "vector_max": 66.51864629895553,
+      "vector_p01": 4.508136878086635,
+      "vector_p99": 17.555779796024996,
+      "axes": {
+        "x": {
+          "mean": 1.1569949729601288,
+          "stddev": 3.4622801911900316,
+          "min": -10.376475,
+          "max": 65.21997
+        },
+        "y": {
+          "mean": 0.9849837582998577,
+          "stddev": 1.238555016190608,
+          "min": -13.013964,
+          "max": 25.414768
+        },
+        "z": {
+          "mean": 8.283077469401476,
+          "stddev": 4.74040746629275,
+          "min": -20.61297,
+          "max": 28.480572
+        }
+      },
+      "first_row": [
+        852543395092371.0,
+        0.62093747,
+        1.8287147,
+        9.68495
+      ],
+      "last_row": [
+        853814840245536.0,
+        -3.8368912,
+        5.456234,
+        8.251649
+      ],
+      "interval_us_min": 8691.667,
+      "interval_us_median": 8692.761,
+      "interval_us_p95": 8692.917,
+      "interval_us_p99": 8692.969,
+      "interval_us_max": 8694.219,
+      "unit_check": {
+        "expect": "m/s^2，静止合矢量接近 9.81",
+        "vector_mean": 9.919205931680303,
+        "static_like": true,
+        "max_range_observed": 65.21997,
+        "saturation_risk": false
+      }
+    },
+    "gyroscope": {
+      "header_ok": true,
+      "header": [
+        "timestamp_ns",
+        "x_rad_s",
+        "y_rad_s",
+        "z_rad_s"
+      ],
+      "sample_count": 58506,
+      "first_timestamp_ns": 852543414146903,
+      "last_timestamp_ns": 853814837568870,
+      "duration_seconds": 1271.423421967,
+      "measured_hz": 46.015354907877814,
+      "strictly_monotonic": true,
+      "duplicate_count": 0,
+      "regression_count": 0,
+      "gaps_over_2x_median": 0,
+      "gaps_over_3x_median": 0,
+      "gaps_over_100ms": 0,
+      "vector_mean": 0.60916784700624,
+      "vector_stddev": 0.4444032177820042,
+      "vector_min": 0.0008772877432256999,
+      "vector_max": 6.974706341618637,
+      "vector_p01": 0.021110078705841112,
+      "vector_p99": 2.0115021352603777,
+      "axes": {
+        "x": {
+          "mean": 0.00250257904047414,
+          "stddev": 0.4600797648706806,
+          "min": -3.0326383,
+          "max": 3.4735298
+        },
+        "y": {
+          "mean": -0.0014113053429145727,
+          "stddev": 0.3681960671279463,
+          "min": -3.31104,
+          "max": 6.2625856
+        },
+        "z": {
+          "mean": -0.0032811325136314264,
+          "stddev": 0.47044546059460796,
+          "min": -2.780962,
+          "max": 3.168403
+        }
+      },
+      "first_row": [
+        852543414146903.0,
+        -0.07116575,
+        0.20189081,
+        0.25747952
+      ],
+      "last_row": [
+        853814837568870.0,
+        -0.34162614,
+        -0.30421066,
+        -0.02367101
+      ],
+      "interval_us_min": 21730.729,
+      "interval_us_median": 21731.927,
+      "interval_us_p95": 21732.292,
+      "interval_us_p99": 21732.448,
+      "interval_us_max": 21733.073,
+      "unit_check": {
+        "expect": "rad/s，静止接近 0",
+        "vector_mean": 0.60916784700624,
+        "vector_p99": 2.0115021352603777,
+        "max_range_observed": 6.2625856,
+        "saturation_risk": false
+      }
+    }
+  },
+  "labels": {
+    "count": 14,
+    "file": "labels.csv",
+    "max_offset_ms": 4.248440999987224,
+    "events": [
+      {
+        "label": "上楼梯",
+        "relative_seconds": 1.456179215,
+        "nearest_accel_index": 168,
+        "nearest_accel_seconds": 1.460343542,
+        "offset_ms": 4.164327000000023
+      },
+      {
+        "label": "开始步行",
+        "relative_seconds": 73.730856843,
+        "nearest_accel_index": 8482,
+        "nearest_accel_seconds": 73.730396748,
+        "offset_ms": 0.4600949999939985
+      },
+      {
+        "label": "静止",
+        "relative_seconds": 94.952236835,
+        "nearest_accel_index": 10923,
+        "nearest_accel_seconds": 94.949302217,
+        "offset_ms": 2.934617999997613
+      },
+      {
+        "label": "开始步行",
+        "relative_seconds": 114.906699953,
+        "nearest_accel_index": 13219,
+        "nearest_accel_seconds": 114.907801934,
+        "offset_ms": 1.1019810000050256
+      },
+      {
+        "label": "结束步行",
+        "relative_seconds": 181.794040865,
+        "nearest_accel_index": 20914,
+        "nearest_accel_seconds": 181.798289306,
+        "offset_ms": 4.248440999987224
+      },
+      {
+        "label": "下楼梯",
+        "relative_seconds": 187.72359581,
+        "nearest_accel_index": 21596,
+        "nearest_accel_seconds": 187.726680765,
+        "offset_ms": 3.084954999991396
+      },
+      {
+        "label": "开始步行",
+        "relative_seconds": 246.78623485,
+        "nearest_accel_index": 28390,
+        "nearest_accel_seconds": 246.784479492,
+        "offset_ms": 1.7553579999969315
+      },
+      {
+        "label": "结束步行",
+        "relative_seconds": 654.226117091,
+        "nearest_accel_index": 75262,
+        "nearest_accel_seconds": 654.22966303,
+        "offset_ms": 3.5459389999914492
+      },
+      {
+        "label": "进入电梯",
+        "relative_seconds": 710.756887382,
+        "nearest_accel_index": 81765,
+        "nearest_accel_seconds": 710.759825612,
+        "offset_ms": 2.938230000040676
+      },
+      {
+        "label": "离开电梯",
+        "relative_seconds": 780.867950584,
+        "nearest_accel_index": 89830,
+        "nearest_accel_seconds": 780.867363193,
+        "offset_ms": 0.5873910000673277
+      },
+      {
+        "label": "开始步行",
+        "relative_seconds": 799.763312816,
+        "nearest_accel_index": 92004,
+        "nearest_accel_seconds": 799.765313193,
+        "offset_ms": 2.0003769999448195
+      },
+      {
+        "label": "结束步行",
+        "relative_seconds": 1099.995030462,
+        "nearest_accel_index": 126542,
+        "nearest_accel_seconds": 1099.997625474,
+        "offset_ms": 2.5950120000288734
+      },
+      {
+        "label": "开始骑行",
+        "relative_seconds": 1105.717785044,
+        "nearest_accel_index": 127200,
+        "nearest_accel_seconds": 1105.717553078,
+        "offset_ms": 0.2319660000011936
+      },
+      {
+        "label": "结束骑行",
+        "relative_seconds": 1269.67647295,
+        "nearest_accel_index": 146062,
+        "nearest_accel_seconds": 1269.680526499,
+        "offset_ms": 4.053548999991108
+      }
+    ]
+  },
+  "metadata": {
+    "schema_version": 2,
+    "session_id": "20261012_114607_166",
+    "status": "completed",
+    "stop_reason": "用户手动停止",
+    "experiment": "lesson2-feature-engineering",
+    "app_version": "1.0",
+    "route_name": "宿舍-食堂-教学楼",
+    "device_placement": "手持",
+    "orientation": "屏幕朝上平放",
+    "target_duration_seconds": 1200,
+    "note": "",
+    "started_at": "2026-10-12 11:46:07.167 +0800",
+    "ended_at": "2026-10-12 12:07:18.609 +0800",
+    "started_elapsed_realtime_ns": 852543412562003,
+    "ended_elapsed_realtime_ns": 853814854846518,
+    "sample_clock": "SensorEvent.timestamp, nanoseconds, same boot-time clock for both sensors",
+    "coordinate_system": "Android device body frame X/Y/Z",
+    "device": {
+      "manufacturer": "Xiaomi",
+      "model": "25019PNF3C",
+      "device": "xuanyuan",
+      "android_release": "17",
+      "android_sdk": 37
+    },
+    "sensors": {
+      "accelerometer": {
+        "name": "lsm6dsv Accelerometer Non-wakeup",
+        "vendor": "STMicro",
+        "version": 28676,
+        "type": 1,
+        "max_range": 156.9064,
+        "resolution": 0.0047856453,
+        "min_delay_us": 5000,
+        "reporting_mode": 0
+      },
+      "gyroscope": {
+        "name": "lsm6dsv Gyroscope Non-wakeup",
+        "vendor": "STMicro",
+        "version": 28676,
+        "type": 4,
+        "max_range": 34.906036,
+        "resolution": 0.0012217296,
+        "min_delay_us": 5000,
+        "reporting_mode": 0
+      }
+    },
+    "samples": {
+      "accelerometer": {
+        "unit": "m/s^2",
+        "sample_count": 146266,
+        "first_timestamp_ns": 852543395092371,
+        "last_timestamp_ns": 853814840245536,
+        "duration_seconds": 1271.445153165,
+        "measured_hz": 115.03838733106458
+      },
+      "gyroscope": {
+        "unit": "rad/s",
+        "sample_count": 58506,
+        "first_timestamp_ns": 852543414146903,
+        "last_timestamp_ns": 853814837568870,
+        "duration_seconds": 1271.423421967,
+        "measured_hz": 46.015354907877814
+      }
+    },
+    "labels": {
+      "file": "labels.csv",
+      "header": "timestamp_elapsed_ns,wall_time_epoch_ms,label",
+      "count": 14,
+      "clock": "timestamp_elapsed_ns uses SystemClock.elapsedRealtimeNanos(), the same boot-time clock as SensorEvent.timestamp"
+    },
+    "error": null
+  },
+  "overall_pass": true
+}

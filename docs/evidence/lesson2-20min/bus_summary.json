@@ -1,0 +1,95 @@
+{
+  "window_seconds": 4.0,
+  "step_seconds": 2.0,
+  "fs_hz": 115.03838733106458,
+  "thresholds": {
+    "step_band_energy_ratio": 0.5,
+    "peak_interval_cv": 0.35
+  },
+  "walking": {
+    "source": "真实打点状态 步行",
+    "window_count": 398,
+    "ratio_mean": 0.8679622226411101,
+    "ratio_median": 0.8802018898119507,
+    "cv_mean": 0.06781665969301555,
+    "classified_walking_ratio": 0.992462311557789
+  },
+  "bus": {
+    "source": "仿真车辆振动参考信号（真实乘车段待 20 分钟路线采集后替换）",
+    "window_count": 39,
+    "ratio_mean": 0.02075572810931372,
+    "ratio_median": 0.01892209177460372,
+    "cv_mean": 0.29154309880069273,
+    "classified_walking_ratio": 0.0
+  },
+  "variance_only_baseline": {
+    "threshold_m_s2_squared": 10.120363843216047,
+    "walking_classified_walking_ratio": 0.5100502512562815,
+    "bus_classified_walking_ratio": 0.41025641025641024,
+    "note": "车辆整体振动会让方差同样很大，只看方差会把大量乘车窗口误判为步行。"
+  },
+  "real_state_groups": {
+    "步行": {
+      "states": [
+        "步行"
+      ],
+      "window_count": 398,
+      "ratio_median": 0.8802018898119507,
+      "cv_mean": 0.06781665969301555,
+      "classified_walking_ratio": 0.992462311557789,
+      "variance_median": 10.211530147611793,
+      "variance_classified_walking_ratio": 0.5100502512562815
+    },
+    "楼梯": {
+      "states": [
+        "楼梯"
+      ],
+      "window_count": 66,
+      "ratio_median": 0.7480189852364142,
+      "cv_mean": 0.13766137597850947,
+      "classified_walking_ratio": 0.8484848484848485,
+      "variance_median": 5.656574961274702,
+      "variance_classified_walking_ratio": 0.10606060606060606
+    },
+    "骑行": {
+      "states": [
+        "骑行"
+      ],
+      "window_count": 82,
+      "ratio_median": 0.1049794002851627,
+      "cv_mean": 0.24468583775447622,
+      "classified_walking_ratio": 0.06097560975609756,
+      "variance_median": 4.712212458911651,
+      "variance_classified_walking_ratio": 0.3780487804878049
+    },
+    "电梯": {
+      "states": [
+        "电梯"
+      ],
+      "window_count": 35,
+      "ratio_median": 0.22453411146704969,
+      "cv_mean": 0.29931989660806513,
+      "classified_walking_ratio": 0.14285714285714285,
+      "variance_median": 0.14800294513401052,
+      "variance_classified_walking_ratio": 0.0
+    },
+    "静止": {
+      "states": [
+        "静止"
+      ],
+      "window_count": 10,
+      "ratio_median": 0.07519064273938858,
+      "cv_mean": 0.17453199140765333,
+      "classified_walking_ratio": 0.1,
+      "variance_median": 0.10243946715077781,
+      "variance_classified_walking_ratio": 0.0
+    }
+  },
+  "gait_vs_vehicle_figure": "D:\\code\\Sensor\\analysis_outputs\\20261012_114607_166\\figures\\walk_vs_bike_spectrum.png",
+  "figure": "D:\\code\\Sensor\\analysis_outputs\\20261012_114607_166\\figures\\bus_features.png",
+  "conclusions": {
+    "feature_1": "步频带能量占比 R=P(0.5~3)/P(0.5~10)；步行能量集中在步频带，R 高。",
+    "feature_2": "峰间隔变异系数 CV=std/mean；步行节奏稳定，CV 低；车辆振动峰间隔杂乱，CV 高。",
+    "why_not_magnitude": "车辆整体振动可能让加速度方差同样很大，仅用“加速度大/方差大”会把乘车误判为步行。"
+  }
+}
