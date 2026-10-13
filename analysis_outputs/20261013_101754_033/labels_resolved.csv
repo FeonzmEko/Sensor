@@ -1,0 +1,4 @@
+﻿record_type,state,start_seconds,end_seconds,start_elapsed_ns,end_elapsed_ns,source
+raw_event,静止,0.780984733,0.780984733,,,labels.csv
+inferred_interval,unknown,0.0,0.780984733,933650263151510,933651044136243,unknown
+inferred_interval,静止,0.780984733,181.375184932,933651044136243,933831638336442,inferred_between_events

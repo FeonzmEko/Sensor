@@ -123,6 +123,40 @@ analysis_outputs/<session_id>/
     └── walk_vs_bike_spectrum.png  # 步行 vs 骑行时域 / 频域对照
 ```
 
+### 进阶：TSFresh + XGBoost + SHAP
+
+```bash
+# 需要在上面基础上额外安装：pip install tsfresh xgboost shap
+# 数据集 = 主路线（573 纯窗）+ 手持静止补充（88 纯窗）= 661 纯窗
+python -m sensor_analysis.advanced \
+    --session "data/20261012_114607_166_20分钟楼梯步行电梯骑行" \
+              "data/20261013_101754_033手持静止三分钟/20261013_101754_033" \
+    --out analysis_outputs/20261012_114607_166 --fc efficient --top-k 20
+
+# 消融：把上 / 下楼梯拆成两个类别（本次最好结果）
+python -m sensor_analysis.advanced --session <同上两个目录> \
+    --out analysis_outputs/20261012_114607_166 --fc efficient --top-k 20 \
+    --stairs-separate --out-suffix _stairs
+
+# 复用缓存的自动特征矩阵（跳过约 2.5 分钟的特征提取）
+python -m sensor_analysis.advanced --session <同上两个目录> \
+    --out analysis_outputs/20261012_114607_166 --reuse-features
+```
+
+主结果（macro-F1）：楼梯合并时手工 45 维 0.8762 / 全特征 2937 维 0.8739 / **SHAP top-20 维 0.8995**；
+上/下楼梯拆分后 **top-20 达 0.9179**——20 维打败 2937 维，训练快约 50 倍。
+
+流水线：纯窗口筛选 → 多会话合并 → 长表 → TSFresh（`EfficientFCParameters`）→
+清洗（inf/全空列/中位数填补/常量列）→ 按区间分组 + 保护带划分（程序化校验零重叠）→
+XGBoost（类别加权）→ SHAP top-k 轻量模型 → 留一区段泛化实验。
+
+产物在 `analysis_outputs/<session_id>/advanced/`：
+`advanced_summary.json`、`advanced_model_comparison.csv`、`advanced_feature_ranking.csv`、
+`advanced_gain_importance.csv`、`advanced_confusion_matrix*.csv`、`advanced_fold_generalization.csv`、
+`advanced_test_predictions.csv`、`advanced_topk_features.csv` 与 `figures/` 三张图。
+自动特征矩阵缓存 `advanced_tsfresh_features.csv.gz` 体积较大，**不入库**（见 `.gitignore`），
+可用 `--reuse-features` 复用。
+
 详见 [分析工程说明](analysis/README.md) 与 [第 2 课时实验报告](docs/experiment2-report.md)。
 
 ---
@@ -185,6 +219,8 @@ Gradle Version Catalog · Python（numpy / pandas / matplotlib / scipy / pytest�
 - [21.2 分钟采集证据（图表 / 质量报告 / 特征汇总）](docs/evidence/lesson2-20min/)
 - [工程代码刷新任务清单](docs/tasks-code-reflash.md)
 - [第 2 课时特征工程实验报告](docs/experiment2-report.md)
+- [进阶实验报告（TSFresh + XGBoost + SHAP）](docs/experiment2-advanced.md)
+- [Related Work（Bulling 2014 / Kwapisz 2011 全文阅读笔记）](docs/related-work.md)
 - [任务 2 验证报告（实测采样频率）](docs/task2-verification.md)
 
 ---

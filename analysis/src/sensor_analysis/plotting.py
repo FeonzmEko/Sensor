@@ -243,8 +243,10 @@ def plot_advanced_comparison(comparison: pd.DataFrame, out_path: str | Path) -> 
     """手工特征 / TSFresh 全特征 / SHAP top-k 的效果对比。"""
     fig, axes = plt.subplots(1, 2, figsize=(12, 4.6))
     positions = np.arange(len(comparison))
-    axes[0].bar(positions - 0.2, comparison["macro_f1"], width=0.38, label="macro-F1")
-    axes[0].bar(positions + 0.2, comparison["accuracy"], width=0.38, label="accuracy")
+    stable = comparison["macro_f1_stable"] if "macro_f1_stable" in comparison else comparison["macro_f1"]
+    axes[0].bar(positions - 0.27, comparison["macro_f1"], width=0.25, label="macro-F1（全部类）")
+    axes[0].bar(positions, stable, width=0.25, label="macro-F1（测试窗口≥5）")
+    axes[0].bar(positions + 0.27, comparison["accuracy"], width=0.25, label="accuracy")
     axes[0].set_xticks(positions)
     axes[0].set_xticklabels(
         [f"{name}\n({dim} 维)" for name, dim in zip(comparison["特征集"], comparison["dimension"])],
@@ -252,8 +254,8 @@ def plot_advanced_comparison(comparison: pd.DataFrame, out_path: str | Path) -> 
     )
     axes[0].set_ylim(0.0, 1.05)
     axes[0].set_ylabel("指标")
-    axes[0].set_title("三种特征集的分类效果")
-    axes[0].legend(fontsize=8)
+    axes[0].set_title("三种特征集的分类效果（双口径）")
+    axes[0].legend(fontsize=7)
 
     axes[1].bar(positions, comparison["train_seconds"], color="#ff7f0e")
     axes[1].set_xticks(positions)

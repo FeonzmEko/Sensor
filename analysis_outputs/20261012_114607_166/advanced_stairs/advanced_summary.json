@@ -1,5 +1,34 @@
 {
   "session_id": "20261012_114607_166",
+  "sessions": [
+    {
+      "session_key": "S1",
+      "session_id": "20261012_114607_166",
+      "directory": "D:\\code\\Sensor\\data\\20261012_114607_166_20分钟楼梯步行电梯骑行",
+      "duration_seconds": 1271.445,
+      "windows_pure": 573,
+      "states": {
+        "步行": 390,
+        "骑行": 80,
+        "上楼梯": 34,
+        "电梯": 33,
+        "下楼梯": 28,
+        "静止": 8
+      }
+    },
+    {
+      "session_key": "S2",
+      "session_id": "20261013_101754_033",
+      "directory": "D:\\code\\Sensor\\data\\20261013_101754_033手持静止三分钟\\20261013_101754_033",
+      "duration_seconds": 181.375,
+      "windows_pure": 88,
+      "states": {
+        "静止": 88
+      }
+    }
+  ],
+  "multi_session": true,
+  "macro_f1_stable_min_support": 5,
   "window_seconds": 4.0,
   "step_seconds": 2.0,
   "channels": [
@@ -8,34 +37,34 @@
     "acc_z",
     "acc_mag"
   ],
-  "windows_total": 634,
-  "windows_pure": 573,
-  "windows_used": 573,
-  "windows_dropped_non_pure": 61,
+  "windows_total": 723,
+  "windows_pure": 661,
+  "windows_used": 661,
+  "windows_dropped_non_pure": 62,
   "stairs_as_separate_classes": true,
   "classes_dropped_too_few_windows": {},
   "state_windows": {
     "步行": 390,
+    "静止": 96,
     "骑行": 80,
     "上楼梯": 34,
     "电梯": 33,
-    "下楼梯": 28,
-    "静止": 8
+    "下楼梯": 28
   },
   "extract": {
     "fc_parameters": "efficient",
     "n_jobs": 0,
-    "extract_seconds": 110.54,
-    "rows": 573,
+    "extract_seconds": 128.79,
+    "rows": 661,
     "raw_dimension": 3108,
     "tsfresh_version": "0.21.2",
-    "cache": "D:\\code\\Sensor\\analysis_outputs\\20261012_114607_166\\advanced_stairs\\advanced_tsfresh_features.csv.gz",
-    "sha256": "0DAF45ADC99A7ED4357E7F5E7D57C881E64C4D175656F15EBC9225058761E378"
+    "cache": "D:\\code\\Sensor\\analysis_outputs\\20261012_114607_166\\advanced_stairs\\advanced_tsfresh_features_d9b8eb7725.csv.gz",
+    "sha256": "CC7A25C6B0359EA0856520184EEAF98033B9AEE8E6DD936D61E456E339CFE703"
   },
   "clean": {
-    "rows": 573,
+    "rows": 661,
     "raw_dimension": 3108,
-    "non_finite_cells": 2292,
+    "non_finite_cells": 2649,
     "dropped_all_nan_columns": 4,
     "dropped_all_nan_examples": [
       "acc_mag__query_similarity_count__query_None__threshold_0.0",
@@ -43,20 +72,21 @@
       "acc_y__query_similarity_count__query_None__threshold_0.0",
       "acc_z__query_similarity_count__query_None__threshold_0.0"
     ],
-    "filled_cells": 0,
-    "dropped_constant_columns": 168,
-    "final_dimension": 2936
+    "filled_cells": 5,
+    "dropped_constant_columns": 167,
+    "final_dimension": 2937
   },
   "split": {
     "mode": "per-segment guard split",
-    "train_windows": 377,
-    "test_windows": 147,
+    "train_windows": 436,
+    "test_windows": 170,
     "guard_seconds": 4.0,
     "test_fraction": 0.3,
-    "dropped_by_guard": 49,
+    "dropped_by_guard": 55,
     "per_segment": {
-      "上楼梯-00": {
+      "S1-上楼梯-00": {
         "state": "上楼梯",
+        "session_id": "20261012_114607_166",
         "windows": 34,
         "train": 21,
         "test": 7,
@@ -64,8 +94,9 @@
         "guard_seconds": 4.0,
         "test_fraction_used": 0.3
       },
-      "下楼梯-04": {
+      "S1-下楼梯-04": {
         "state": "下楼梯",
+        "session_id": "20261012_114607_166",
         "windows": 28,
         "train": 17,
         "test": 5,
@@ -73,8 +104,9 @@
         "guard_seconds": 4.0,
         "test_fraction_used": 0.3
       },
-      "步行-01": {
+      "S1-步行-01": {
         "state": "步行",
+        "session_id": "20261012_114607_166",
         "windows": 9,
         "train": 5,
         "test": 1,
@@ -82,8 +114,9 @@
         "guard_seconds": 2.0,
         "test_fraction_used": 0.3
       },
-      "步行-03": {
+      "S1-步行-03": {
         "state": "步行",
+        "session_id": "20261012_114607_166",
         "windows": 31,
         "train": 19,
         "test": 6,
@@ -91,8 +124,9 @@
         "guard_seconds": 4.0,
         "test_fraction_used": 0.3
       },
-      "步行-05": {
+      "S1-步行-05": {
         "state": "步行",
+        "session_id": "20261012_114607_166",
         "windows": 202,
         "train": 139,
         "test": 57,
@@ -100,8 +134,9 @@
         "guard_seconds": 4.0,
         "test_fraction_used": 0.3
       },
-      "步行-07": {
+      "S1-步行-07": {
         "state": "步行",
+        "session_id": "20261012_114607_166",
         "windows": 148,
         "train": 101,
         "test": 41,
@@ -109,8 +144,9 @@
         "guard_seconds": 4.0,
         "test_fraction_used": 0.3
       },
-      "电梯-06": {
+      "S1-电梯-06": {
         "state": "电梯",
+        "session_id": "20261012_114607_166",
         "windows": 33,
         "train": 20,
         "test": 7,
@@ -118,8 +154,9 @@
         "guard_seconds": 4.0,
         "test_fraction_used": 0.3
       },
-      "静止-02": {
+      "S1-静止-02": {
         "state": "静止",
+        "session_id": "20261012_114607_166",
         "windows": 8,
         "train": 2,
         "test": 2,
@@ -127,12 +164,23 @@
         "guard_seconds": 2.0,
         "test_fraction_used": 0.5
       },
-      "骑行-08": {
+      "S1-骑行-08": {
         "state": "骑行",
+        "session_id": "20261012_114607_166",
         "windows": 80,
         "train": 53,
         "test": 21,
         "cut_seconds": 1219.4,
+        "guard_seconds": 4.0,
+        "test_fraction_used": 0.3
+      },
+      "S2-静止-00": {
+        "state": "静止",
+        "session_id": "20261013_101754_033",
+        "windows": 88,
+        "train": 59,
+        "test": 23,
+        "cut_seconds": 126.6,
         "guard_seconds": 4.0,
         "test_fraction_used": 0.3
       }
@@ -141,7 +189,8 @@
   },
   "leakage_check": {
     "overlapping_window_pairs": 0,
-    "passed": true
+    "passed": true,
+    "sessions_checked": 2
   },
   "classes": [
     "上楼梯",
@@ -152,14 +201,25 @@
     "骑行"
   ],
   "auto_metrics": {
-    "accuracy": 0.9591836734693877,
-    "macro_f1": 0.7655270655270655,
-    "weighted_f1": 0.9558491772777487,
+    "accuracy": 0.9588235294117647,
+    "macro_f1": 0.9087815895589005,
+    "macro_f1_stable": 0.9087815895589005,
+    "stable_classes": [
+      "上楼梯",
+      "下楼梯",
+      "步行",
+      "电梯",
+      "静止",
+      "骑行"
+    ],
+    "stable_min_support": 5,
+    "classes_below_min_support": [],
+    "weighted_f1": 0.9613204603108211,
     "per_class": {
       "上楼梯": {
-        "precision": 0.7777777777777778,
+        "precision": 0.7,
         "recall": 1.0,
-        "f1": 0.875,
+        "f1": 0.8235294117647058,
         "support": 7
       },
       "下楼梯": {
@@ -175,16 +235,16 @@
         "support": 105
       },
       "电梯": {
-        "precision": 0.6363636363636364,
-        "recall": 1.0,
-        "f1": 0.7777777777777778,
+        "precision": 0.6666666666666666,
+        "recall": 0.8571428571428571,
+        "f1": 0.75,
         "support": 7
       },
       "静止": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "support": 2
+        "precision": 0.9583333333333334,
+        "recall": 0.92,
+        "f1": 0.9387755102040817,
+        "support": 25
       },
       "骑行": {
         "precision": 1.0,
@@ -193,17 +253,28 @@
         "support": 21
       }
     },
-    "train_seconds": 9.08,
+    "train_seconds": 10.75,
     "balanced_sample_weight": true,
-    "train_rows": 377,
-    "test_rows": 147,
-    "dimension": 2936,
+    "train_rows": 436,
+    "test_rows": 170,
+    "dimension": 2937,
     "xgboost_version": "3.4.1"
   },
   "light_metrics": {
-    "accuracy": 0.9591836734693877,
-    "macro_f1": 0.7675350096261143,
-    "weighted_f1": 0.9588618999820065,
+    "accuracy": 0.9647058823529412,
+    "macro_f1": 0.9178618070117351,
+    "macro_f1_stable": 0.9178618070117351,
+    "stable_classes": [
+      "上楼梯",
+      "下楼梯",
+      "步行",
+      "电梯",
+      "静止",
+      "骑行"
+    ],
+    "stable_min_support": 5,
+    "classes_below_min_support": [],
+    "weighted_f1": 0.9659270662243487,
     "per_class": {
       "上楼梯": {
         "precision": 0.875,
@@ -224,16 +295,16 @@
         "support": 105
       },
       "电梯": {
-        "precision": 0.6,
-        "recall": 0.8571428571428571,
-        "f1": 0.7058823529411765,
+        "precision": 0.625,
+        "recall": 0.7142857142857143,
+        "f1": 0.6666666666666666,
         "support": 7
       },
       "静止": {
-        "precision": 0.0,
-        "recall": 0.0,
-        "f1": 0.0,
-        "support": 2
+        "precision": 0.9230769230769231,
+        "recall": 0.96,
+        "f1": 0.9411764705882353,
+        "support": 25
       },
       "骑行": {
         "precision": 1.0,
@@ -242,17 +313,28 @@
         "support": 21
       }
     },
-    "train_seconds": 0.33,
+    "train_seconds": 0.35,
     "balanced_sample_weight": true,
-    "train_rows": 377,
-    "test_rows": 147,
+    "train_rows": 436,
+    "test_rows": 170,
     "dimension": 20,
     "xgboost_version": "3.4.1"
   },
   "handcrafted_metrics": {
-    "accuracy": 0.9455782312925171,
-    "macro_f1": 0.8522015728530491,
-    "weighted_f1": 0.9493245374549243,
+    "accuracy": 0.9352941176470588,
+    "macro_f1": 0.8577043097940931,
+    "macro_f1_stable": 0.8577043097940931,
+    "stable_classes": [
+      "上楼梯",
+      "下楼梯",
+      "步行",
+      "电梯",
+      "静止",
+      "骑行"
+    ],
+    "stable_min_support": 5,
+    "classes_below_min_support": [],
+    "weighted_f1": 0.9395043404358646,
     "per_class": {
       "上楼梯": {
         "precision": 0.5833333333333334,
@@ -261,28 +343,28 @@
         "support": 7
       },
       "下楼梯": {
-        "precision": 0.8333333333333334,
+        "precision": 0.7142857142857143,
         "recall": 1.0,
-        "f1": 0.9090909090909091,
+        "f1": 0.8333333333333334,
         "support": 5
       },
       "步行": {
         "precision": 1.0,
-        "recall": 0.9523809523809523,
-        "f1": 0.975609756097561,
+        "recall": 0.9428571428571428,
+        "f1": 0.9705882352941176,
         "support": 105
       },
       "电梯": {
-        "precision": 0.7777777777777778,
-        "recall": 1.0,
-        "f1": 0.875,
+        "precision": 0.7142857142857143,
+        "recall": 0.7142857142857143,
+        "f1": 0.7142857142857143,
         "support": 7
       },
       "静止": {
-        "precision": 1.0,
-        "recall": 0.5,
-        "f1": 0.6666666666666666,
-        "support": 2
+        "precision": 0.9230769230769231,
+        "recall": 0.96,
+        "f1": 0.9411764705882353,
+        "support": 25
       },
       "骑行": {
         "precision": 1.0,
@@ -291,16 +373,16 @@
         "support": 21
       }
     },
-    "train_seconds": 0.41,
+    "train_seconds": 0.34,
     "balanced_sample_weight": true,
-    "train_rows": 377,
-    "test_rows": 147,
+    "train_rows": 436,
+    "test_rows": 170,
     "dimension": 45,
     "xgboost_version": "3.4.1"
   },
   "shap": {
-    "rows_explained": 147,
-    "seconds": 0.25,
+    "rows_explained": 170,
+    "seconds": 0.23,
     "shap_version": "0.53.0",
     "classes": [
       "上楼梯",
@@ -314,45 +396,46 @@
   "top_k": 20,
   "top_features": [
     "acc_mag__cid_ce__normalize_True",
-    "acc_mag__fft_coefficient__attr_\"abs\"__coeff_51",
-    "acc_z__change_quantiles__f_agg_\"var\"__isabs_False__qh_0.4__ql_0.2",
     "acc_z__agg_autocorrelation__f_agg_\"mean\"__maxlag_40",
-    "acc_z__quantile__q_0.1",
-    "acc_x__number_crossing_m__m_1",
+    "acc_z__sum_of_reoccurring_values",
+    "acc_y__abs_energy",
+    "acc_y__quantile__q_0.9",
     "acc_y__fft_coefficient__attr_\"abs\"__coeff_43",
+    "acc_z__quantile__q_0.1",
     "acc_mag__autocorrelation__lag_1",
     "acc_x__number_crossing_m__m_0",
+    "acc_x__autocorrelation__lag_9",
+    "acc_x__number_crossing_m__m_1",
+    "acc_z__count_above_mean",
+    "acc_z__permutation_entropy__dimension_5__tau_1",
     "acc_z__permutation_entropy__dimension_3__tau_1",
     "acc_mag__number_peaks__n_5",
     "acc_z__agg_autocorrelation__f_agg_\"var\"__maxlag_40",
-    "acc_z__count_above_mean",
-    "acc_mag__agg_autocorrelation__f_agg_\"var\"__maxlag_40",
-    "acc_mag__change_quantiles__f_agg_\"var\"__isabs_False__qh_0.4__ql_0.2",
-    "acc_mag__autocorrelation__lag_9",
-    "acc_z__friedrich_coefficients__coeff_1__m_3__r_30",
-    "acc_z__permutation_entropy__dimension_5__tau_1",
-    "acc_x__autocorrelation__lag_9",
-    "acc_z__change_quantiles__f_agg_\"mean\"__isabs_True__qh_0.4__ql_0.2"
+    "acc_mag__number_peaks__n_3",
+    "acc_z__ar_coefficient__coeff_5__k_10",
+    "acc_z__fft_coefficient__attr_\"abs\"__coeff_47",
+    "acc_z__quantile__q_0.4"
   ],
   "top_feature_families": {
-    "频域聚合量族": 8,
+    "频域聚合量族": 6,
     "计数与分位族": 6,
     "熵与复杂度族": 3,
-    "极值族": 2,
-    "其它": 1
+    "极值族": 3,
+    "方差族": 1,
+    "趋势与形态族": 1
   },
   "family_share_all_features": {
-    "频域聚合量族": 0.6713215258855586,
-    "计数与分位族": 0.11171662125340599,
-    "趋势与形态族": 0.09809264305177112,
-    "方差族": 0.055517711171662126,
-    "极值族": 0.02656675749318801,
-    "熵与复杂度族": 0.021798365122615803,
-    "其它": 0.014986376021798364
+    "频域聚合量族": 0.6710929519918284,
+    "计数与分位族": 0.11167858358869595,
+    "趋势与形态族": 0.09839972761321075,
+    "方差族": 0.05549880830779707,
+    "极值族": 0.026557711950970377,
+    "熵与复杂度族": 0.021790943139257744,
+    "其它": 0.0149812734082397
   },
   "leave_one_segment_out": [
     {
-      "held_out_segment": "步行-01",
+      "held_out_segment": "S1-步行-01",
       "held_out_state": "步行",
       "test_windows": 9,
       "test_seconds": 36.0,
@@ -362,7 +445,7 @@
       "held_out_f1": 0.6153846153846154
     },
     {
-      "held_out_segment": "步行-03",
+      "held_out_segment": "S1-步行-03",
       "held_out_state": "步行",
       "test_windows": 31,
       "test_seconds": 124.0,
@@ -372,7 +455,7 @@
       "held_out_f1": 0.9666666666666667
     },
     {
-      "held_out_segment": "步行-05",
+      "held_out_segment": "S1-步行-05",
       "held_out_state": "步行",
       "test_windows": 202,
       "test_seconds": 808.0,
@@ -382,14 +465,34 @@
       "held_out_f1": 0.9975186104218362
     },
     {
-      "held_out_segment": "步行-07",
+      "held_out_segment": "S1-步行-07",
       "held_out_state": "步行",
       "test_windows": 148,
       "test_seconds": 592.0,
-      "accuracy": 1.0,
-      "macro_f1": 0.16666666666666666,
-      "held_out_recall": 1.0,
-      "held_out_f1": 1.0
+      "accuracy": 0.9932432432432432,
+      "macro_f1": 0.16610169491525426,
+      "held_out_recall": 0.9932432432432432,
+      "held_out_f1": 0.9966101694915255
+    },
+    {
+      "held_out_segment": "S1-静止-02",
+      "held_out_state": "静止",
+      "test_windows": 8,
+      "test_seconds": 32.0,
+      "accuracy": 0.0,
+      "macro_f1": 0.0,
+      "held_out_recall": 0.0,
+      "held_out_f1": 0.0
+    },
+    {
+      "held_out_segment": "S2-静止-00",
+      "held_out_state": "静止",
+      "test_windows": 88,
+      "test_seconds": 352.0,
+      "accuracy": 0.0,
+      "macro_f1": 0.0,
+      "held_out_recall": 0.0,
+      "held_out_f1": 0.0
     }
   ],
   "figures": {

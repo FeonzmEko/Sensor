@@ -17,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from collections.abc import Sequence
 from pathlib import Path
 
 import numpy as np
@@ -31,6 +32,9 @@ from .session import (
     load_session,
 )
 from .windows import WindowSpec, iter_window_bounds
+
+#: 多会话合并时，各会话的窗口编号按该步长平移，保证 TSFresh 实体 id 与切分键全局唯一。
+SESSION_WINDOW_OFFSET: int = 100_000
 
 DEFAULT_CHANNELS: tuple[str, ...] = ("acc_x", "acc_y", "acc_z", "acc_mag")
 GYRO_CHANNELS: tuple[str, ...] = ("gyro_x", "gyro_y", "gyro_z", "gyro_mag")
@@ -145,8 +149,15 @@ def build_pure_windows(
     session: SensorSession,
     spec: WindowSpec,
     aliases: dict[str, str] | None = None,
+    session_key: str = "S1",
+    window_offset: int = 0,
+    prefix_segments: bool = False,
 ) -> pd.DataFrame:
-    """只保留整窗落在同一个打点状态内的窗口，并给出所属区间编号。"""
+    """只保留整窗落在同一个打点状态内的窗口，并给出所属区间编号。
+
+    多会话合并时，`window_offset` 把各会话的窗口编号平移到互不重叠的区间，
+    `session_key` 前缀保证 `segment_id`（切分与留一实验的分组键）全局唯一。
+    """
     intervals = [
         (state, start, end)
         for state, start, end in build_state_intervals(
@@ -161,18 +172,31 @@ def build_pure_windows(
             if seg_start - 1e-9 <= start and end <= seg_end + 1e-9:
                 rows.append(
                     {
-                        "window_id": window_id,
+                        "session_id": session.session_id,
+                        "session_key": session_key,
+                        "window_id": window_offset + window_id,
+                        "local_window_id": window_id,
                         "start_seconds": float(start),
                         "end_seconds": float(end),
                         "state": state,
-                        "segment_id": f"{state}-{index:02d}",
+                        "segment_id": (f"{session_key}-" if prefix_segments else "")
+                        + f"{state}-{index:02d}",
                     }
                 )
                 break
 
     frame = pd.DataFrame(
         rows,
-        columns=["window_id", "start_seconds", "end_seconds", "state", "segment_id"],
+        columns=[
+            "session_id",
+            "session_key",
+            "window_id",
+            "local_window_id",
+            "start_seconds",
+            "end_seconds",
+            "state",
+            "segment_id",
+        ],
     )
     stream = session.accelerometer
     times = stream.time_seconds
@@ -371,6 +395,7 @@ def split_windows(
         test_ids.extend(segment_test)
         detail[str(segment)] = {
             "state": str(ordered["state"].iloc[0]),
+            "session_id": str(ordered["session_id"].iloc[0]),
             "windows": int(len(ordered)),
             "train": len(segment_train),
             "test": len(segment_test),
@@ -442,15 +467,35 @@ def check_no_overlap(
     train_ids: np.ndarray,
     test_ids: np.ndarray,
 ) -> dict[str, object]:
-    """程序化校验：训练窗口与验证窗口在时间轴上没有任何重叠。"""
+    """程序化校验：训练窗口与验证窗口在时间轴上没有任何重叠。
+
+    多会话合并时各会话的时间轴都从 0 开始，因此只在**同一会话**内部两两比对；
+    跨会话的窗口本来就不共享同一段时间，不应算作重叠。
+    """
     index = windows.set_index("window_id")
-    train = index.loc[train_ids, ["start_seconds", "end_seconds"]].to_numpy(dtype=float)
-    test = index.loc[test_ids, ["start_seconds", "end_seconds"]].to_numpy(dtype=float)
     overlaps = 0
-    for start, end in train:
-        hits = np.sum((test[:, 0] < end - 1e-9) & (test[:, 1] > start + 1e-9))
-        overlaps += int(hits)
-    return {"overlapping_window_pairs": overlaps, "passed": overlaps == 0}
+    sessions = 0
+    for _session_id, group in windows.groupby("session_id", sort=True):
+        sessions += 1
+        ids = {int(value) for value in group["window_id"]}
+        train = index.loc[
+            [value for value in train_ids if int(value) in ids],
+            ["start_seconds", "end_seconds"],
+        ].to_numpy(dtype=float)
+        test = index.loc[
+            [value for value in test_ids if int(value) in ids],
+            ["start_seconds", "end_seconds"],
+        ].to_numpy(dtype=float)
+        if train.size == 0 or test.size == 0:
+            continue
+        for start, end in train:
+            hits = np.sum((test[:, 0] < end - 1e-9) & (test[:, 1] > start + 1e-9))
+            overlaps += int(hits)
+    return {
+        "overlapping_window_pairs": overlaps,
+        "passed": overlaps == 0,
+        "sessions_checked": sessions,
+    }
 
 
 def _label_encode(y: pd.Series) -> tuple[np.ndarray, list[str]]:
@@ -468,10 +513,13 @@ def train_xgboost(
     seed: int = 20261012,
     n_estimators: int = 300,
     balanced: bool = True,
+    min_test_support: int = 5,
 ) -> tuple[object, dict[str, object], np.ndarray]:
     """训练 XGBoost 多分类器并返回模型、指标与混淆矩阵。
 
     `balanced=True` 时按类别频次倒数加权，避免步行段样本数压倒其它状态。
+    指标同时给出两个口径：`macro_f1` 统计全部类别，`macro_f1_stable` 只统计
+    验证窗口数 `>= min_test_support` 的类别（类别不平衡时建议看后者，见 Bulling 教程）。
     """
     from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
     from xgboost import XGBClassifier
@@ -513,9 +561,22 @@ def train_xgboost(
         y_test, predicted, labels=labels, target_names=classes, output_dict=True, zero_division=0
     )
     matrix = confusion_matrix(y_test, predicted, labels=labels)
+    stable_classes = [
+        name for name in classes if int(report[name]["support"]) >= int(min_test_support)
+    ]
     metrics = {
         "accuracy": float(accuracy_score(y_test, predicted)),
         "macro_f1": float(report["macro avg"]["f1-score"]),
+        "macro_f1_stable": (
+            float(np.mean([report[name]["f1-score"] for name in stable_classes]))
+            if stable_classes
+            else float("nan")
+        ),
+        "stable_classes": stable_classes,
+        "stable_min_support": int(min_test_support),
+        "classes_below_min_support": [
+            name for name in classes if name not in stable_classes
+        ],
         "weighted_f1": float(report["weighted avg"]["f1-score"]),
         "per_class": {
             name: {
@@ -574,7 +635,7 @@ def _family_table(importance: pd.Series, top_k: int) -> pd.DataFrame:
 
 
 def run_advanced_experiment(
-    session_dir: str | Path,
+    session_dir: str | Path | Sequence[str | Path],
     out_dir: str | Path | None = None,
     window_seconds: float = 4.0,
     step_seconds: float = 2.0,
@@ -586,30 +647,76 @@ def run_advanced_experiment(
     shap_rows: int = 200,
     min_class_windows: int = 8,
     min_test_windows: int = 3,
+    min_test_support: int = 5,
     seed: int = 20261012,
     reuse_features: bool = False,
     separate_stairs: bool = False,
     out_suffix: str = "",
 ) -> Path:
-    session = load_session(session_dir)
-    output = (Path(out_dir) if out_dir else Path("analysis_outputs") / session.session_id) / (
-        f"advanced{out_suffix}"
-    )
-    output = output.resolve()
+    """跑一遍 TSFresh + XGBoost 进阶流水线。
+
+    `session_dir` 可以是单个会话目录，也可以是会话目录列表；多会话时把各会话的
+    纯窗口合并成一份数据集（窗口编号按会话平移、互不冲突），这样补充采集的
+    “静止”会话能把样本量不足的类别做实。
+    """
+    if isinstance(session_dir, (str, Path)):
+        session_paths: list[str | Path] = [session_dir]
+    else:
+        session_paths = list(session_dir)
+    if not session_paths:
+        raise ValueError("至少需要一个会话目录")
+    sessions = [load_session(path) for path in session_paths]
+    multi_session = len(sessions) > 1
+
+    base = Path(out_dir) if out_dir else Path("analysis_outputs") / sessions[0].session_id
+    output = (base / f"advanced{out_suffix}").resolve()
     figures = output / "figures"
     figures.mkdir(parents=True, exist_ok=True)
 
     spec = WindowSpec(window_seconds=window_seconds, step_seconds=step_seconds)
-    total_windows = len(iter_window_bounds(session.duration_seconds, spec))
     aliases = SEPARATE_STAIRS_ALIASES if separate_stairs else None
-    meta_all = build_pure_windows(session, spec, aliases=aliases)
+    parts: list[pd.DataFrame] = []
+    session_report: list[dict[str, object]] = []
+    total_windows = 0
+    for index, session in enumerate(sessions):
+        total_windows += len(iter_window_bounds(session.duration_seconds, spec))
+        part = build_pure_windows(
+            session,
+            spec,
+            aliases=aliases,
+            session_key=f"S{index + 1}",
+            window_offset=index * SESSION_WINDOW_OFFSET,
+            prefix_segments=multi_session,
+        )
+        parts.append(part)
+        session_report.append(
+            {
+                "session_key": f"S{index + 1}",
+                "session_id": session.session_id,
+                "directory": str(session.directory),
+                "duration_seconds": round(float(session.duration_seconds), 3),
+                "windows_pure": int(len(part)),
+                "states": {str(k): int(v) for k, v in part["state"].value_counts().items()},
+            }
+        )
+    meta_all = pd.concat(parts, ignore_index=True)
 
     keep_states, dropped_states = filter_rare_classes(meta_all, min_windows=min_class_windows)
     meta = meta_all[meta_all["state"].isin(keep_states)].reset_index(drop=True)
 
     # 特征矩阵按“全部纯窗口”提取并缓存：类别筛选（例如静止样本太少）与
     # 上下楼梯是否拆分都不影响窗口集合，因此同一份缓存可以被不同配置复用。
-    cache_path = output / "advanced_tsfresh_features.csv.gz"
+    # 缓存文件名带上「会话集合 + 通道 + 参数集」的摘要，避免换成别的会话后
+    # 因为窗口编号区间重叠而静默复用上一批特征。
+    import hashlib
+
+    cache_key = hashlib.sha1(
+        "|".join(
+            [session.session_id for session in sessions]
+            + [",".join(channels), fc_parameters, f"{window_seconds:g}", f"{step_seconds:g}"]
+        ).encode("utf-8")
+    ).hexdigest()[:10]
+    cache_path = output / f"advanced_tsfresh_features_{cache_key}.csv.gz"
     needed = set(int(value) for value in meta_all["window_id"])
     features: pd.DataFrame | None = None
     if reuse_features and cache_path.exists():
@@ -630,7 +737,13 @@ def run_advanced_experiment(
             )
 
     if features is None:
-        long_table = build_long_table(session, meta_all, channels=channels)
+        long_table = pd.concat(
+            [
+                build_long_table(session, part, channels=channels)
+                for session, part in zip(sessions, parts)
+            ],
+            ignore_index=True,
+        )
         features, extract_meta = extract_tsfresh_features(long_table, fc_parameters=fc_parameters)
         features.index.name = "window_id"
         features.to_csv(cache_path, compression="gzip", encoding="utf-8")
@@ -666,7 +779,14 @@ def run_advanced_experiment(
     y_test = y_array.loc[test_index].to_numpy()
 
     model, auto_metrics, confusion = train_xgboost(
-        X_train, y_train, X_test, y_test, classes, seed=seed, n_estimators=n_estimators
+        X_train,
+        y_train,
+        X_test,
+        y_test,
+        classes,
+        seed=seed,
+        n_estimators=n_estimators,
+        min_test_support=min_test_support,
     )
     gain_importance = pd.Series(model.feature_importances_, index=matrix.columns).sort_values(
         ascending=False
@@ -683,9 +803,14 @@ def run_advanced_experiment(
         classes,
         seed=seed,
         n_estimators=n_estimators,
+        min_test_support=min_test_support,
     )
 
-    handcrafted = _handcrafted_matrix(output.parent / "window_features.csv", meta["window_id"])
+    session_sources = [
+        (Path("analysis_outputs") / session.session_id / "window_features.csv", index * SESSION_WINDOW_OFFSET)
+        for index, session in enumerate(sessions)
+    ]
+    handcrafted = _handcrafted_matrix(session_sources, meta["window_id"])
     hand_train = handcrafted.loc[handcrafted.index.intersection(train_ids)]
     hand_test = handcrafted.loc[handcrafted.index.intersection(test_ids)]
     _, hand_metrics, hand_confusion = train_xgboost(
@@ -696,6 +821,7 @@ def run_advanced_experiment(
         classes,
         seed=seed,
         n_estimators=n_estimators,
+        min_test_support=min_test_support,
     )
 
     folds = leave_one_segment_out(meta, min_test_windows=min_test_windows)
@@ -713,6 +839,7 @@ def run_advanced_experiment(
             classes,
             seed=seed,
             n_estimators=n_estimators,
+            min_test_support=min_test_support,
         )
         held_out = str(fold["state"])
         fold_rows.append(
@@ -735,6 +862,7 @@ def run_advanced_experiment(
                 "特征集": "手工四件套 + 频域",
                 "dimension": int(handcrafted.shape[1]),
                 "macro_f1": hand_metrics["macro_f1"],
+                "macro_f1_stable": hand_metrics["macro_f1_stable"],
                 "accuracy": hand_metrics["accuracy"],
                 "train_seconds": hand_metrics["train_seconds"],
             },
@@ -742,6 +870,7 @@ def run_advanced_experiment(
                 "特征集": "TSFresh 全特征",
                 "dimension": int(matrix.shape[1]),
                 "macro_f1": auto_metrics["macro_f1"],
+                "macro_f1_stable": auto_metrics["macro_f1_stable"],
                 "accuracy": auto_metrics["accuracy"],
                 "train_seconds": auto_metrics["train_seconds"],
             },
@@ -749,6 +878,7 @@ def run_advanced_experiment(
                 "特征集": f"TSFresh top-{top_k}（SHAP 筛选）",
                 "dimension": int(light_metrics["dimension"]),
                 "macro_f1": light_metrics["macro_f1"],
+                "macro_f1_stable": light_metrics["macro_f1_stable"],
                 "accuracy": light_metrics["accuracy"],
                 "train_seconds": light_metrics["train_seconds"],
             },
@@ -756,7 +886,10 @@ def run_advanced_experiment(
     )
 
     summary = {
-        "session_id": session.session_id,
+        "session_id": sessions[0].session_id,
+        "sessions": session_report,
+        "multi_session": multi_session,
+        "macro_f1_stable_min_support": int(min_test_support),
         "window_seconds": window_seconds,
         "step_seconds": step_seconds,
         "channels": list(channels),
@@ -829,25 +962,44 @@ def run_advanced_experiment(
     return output
 
 
-def _handcrafted_matrix(source: Path, window_ids: pd.Series) -> pd.DataFrame:
-    """从已有的逐窗口特征表里取出“手工特征”子集，用于对比。"""
-    if not Path(source).exists():
-        raise FileNotFoundError(
-            f"找不到 {source}，请先运行 python -m sensor_analysis.pipeline 生成逐窗口特征表"
-        )
-    frame = pd.read_csv(source)
-    columns = [
-        name
-        for name in frame.columns
-        if name.startswith(HANDCRAFTED_PREFIXES) or name in HANDCRAFTED_COLUMNS
-    ]
-    selected = frame.set_index("window_id").loc[window_ids.tolist(), columns]
+def _handcrafted_matrix(
+    sources: Sequence[tuple[Path, int]],
+    window_ids: pd.Series,
+) -> pd.DataFrame:
+    """从各会话的逐窗口特征表里取出“手工特征”子集并拼接，用于对比。
+
+    `sources` = [(window_features.csv 路径, 窗口编号平移量)]；平移量与自动特征
+    使用同一套规则，因此两种特征集落在同一组全局窗口编号上。
+    """
+    frames: list[pd.DataFrame] = []
+    columns: list[str] = []
+    for source, offset in sources:
+        if not Path(source).exists():
+            raise FileNotFoundError(
+                f"找不到 {source}，请先运行 python -m sensor_analysis.pipeline 生成逐窗口特征表"
+            )
+        frame = pd.read_csv(source)
+        columns = [
+            name
+            for name in frame.columns
+            if name.startswith(HANDCRAFTED_PREFIXES) or name in HANDCRAFTED_COLUMNS
+        ]
+        part = frame[["window_id", *columns]].copy()
+        part["window_id"] = part["window_id"].astype(int) + int(offset)
+        frames.append(part.set_index("window_id"))
+    combined = pd.concat(frames)
+    selected = combined.loc[window_ids.tolist(), columns]
     return selected.astype(float)
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description="TSFresh + XGBoost 进阶流水线")
-    parser.add_argument("--session", required=True, help="会话目录（含 accelerometer.csv 等）")
+    parser.add_argument(
+        "--session",
+        required=True,
+        nargs="+",
+        help="会话目录（含 accelerometer.csv 等）；可传多个，合并成一份数据集",
+    )
     parser.add_argument("--out", default=None, help="输出目录，默认 analysis_outputs/<session_id>")
     parser.add_argument("--window", type=float, default=4.0, help="窗长（秒）")
     parser.add_argument("--step", type=float, default=2.0, help="步进（秒）")
@@ -858,6 +1010,12 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--n-estimators", type=int, default=300, help="XGBoost 树数量")
     parser.add_argument("--shap-rows", type=int, default=200, help="计算 SHAP 的样本上限")
     parser.add_argument("--seed", type=int, default=20261012, help="随机种子")
+    parser.add_argument(
+        "--min-test-support",
+        type=int,
+        default=5,
+        help="稳定口径 macro-F1 只统计验证窗口数不少于该值的类别（默认 5）",
+    )
     parser.add_argument(
         "--stairs-separate",
         action="store_true",
@@ -871,7 +1029,7 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--reuse-features",
         action="store_true",
-        help="复用已缓存的 TSFresh 特征矩阵（advanced_tsfresh_features.csv.gz），跳过约 7 分钟的提取",
+        help="复用已缓存的 TSFresh 特征矩阵（advanced_tsfresh_features.csv.gz），跳过自动特征提取",
     )
     args = parser.parse_args(argv)
 
@@ -887,6 +1045,7 @@ def main(argv: list[str] | None = None) -> int:
         test_fraction=args.test_fraction,
         n_estimators=args.n_estimators,
         shap_rows=args.shap_rows,
+        min_test_support=args.min_test_support,
         seed=args.seed,
         reuse_features=args.reuse_features,
         separate_stairs=args.stairs_separate,
