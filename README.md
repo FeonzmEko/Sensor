@@ -175,6 +175,25 @@ XGBoost（类别加权）→ SHAP top-k 轻量模型 → 留一区段泛化实�
 
 ---
 
+## 提交归档
+
+| 项 | 值 |
+|---|---|
+| 归档包 | `data/lesson2-submission.zip`（18.47 MB / 167 条目，解压后 32.9 MB / 163 文件） |
+| SHA-256 | `67B82EF56E1B2A1F66C787E521D32C9B66CF5995784DBDFBFCBD47D341F6567A` |
+| 校验文件 | `data/lesson2-submission.zip.sha256` |
+| 备份 ①（仓库） | `data/lesson2-submission.zip` |
+| 备份 ②（课程资料） | `D:\study\大三上\多元感知融合\lesson2-submission.zip`（哈希与 ① 一致） |
+| 归档记录 | [docs/evidence/archive-manifest.md](docs/evidence/archive-manifest.md) |
+
+包内含三个会话的原始数据、全部派生结果与图表、四份文档、分析工程源码，以及
+`SHA256SUMS.txt`（包内 162 个文件的逐项校验值）。
+
+> 归档包本身**不入库**（`.gitignore`，内容均已在仓库内，可由仓库内容重新生成），
+> 入库的是它的 SHA-256 与归档记录。
+
+---
+
 ## 构建与运行
 
 ### 环境要求

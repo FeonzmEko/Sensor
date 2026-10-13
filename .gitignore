@@ -38,6 +38,9 @@ analysis_outputs/**/spectrum_cache*/
 # --- TSFresh 全特征矩阵缓存（约 14 MB，可用 --reuse-features 直接复用，不入库） ---
 analysis_outputs/**/advanced*/advanced_tsfresh_features*.csv.gz
 
+# --- 归档包：18.5 MB 的提交包，内容已在仓库内，可重新生成；只入库它的 SHA-256 ---
+data/lesson2-submission.zip
+
 # --- 已弃用的录制（设备未手持，属录制失误，见 docs/tasks2.md 第 6 节），派生结果不入库 ---
 analysis_outputs/20261013_095403_382/
 
