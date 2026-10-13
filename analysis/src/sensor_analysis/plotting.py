@@ -237,3 +237,77 @@ def plot_bus_features(
     axes[1].set_title("能量占比分布")
     axes[1].legend(fontsize=8)
     return _save(fig, out_path)
+
+
+def plot_advanced_comparison(comparison: pd.DataFrame, out_path: str | Path) -> Path:
+    """手工特征 / TSFresh 全特征 / SHAP top-k 的效果对比。"""
+    fig, axes = plt.subplots(1, 2, figsize=(12, 4.6))
+    positions = np.arange(len(comparison))
+    axes[0].bar(positions - 0.2, comparison["macro_f1"], width=0.38, label="macro-F1")
+    axes[0].bar(positions + 0.2, comparison["accuracy"], width=0.38, label="accuracy")
+    axes[0].set_xticks(positions)
+    axes[0].set_xticklabels(
+        [f"{name}\n({dim} 维)" for name, dim in zip(comparison["特征集"], comparison["dimension"])],
+        fontsize=8,
+    )
+    axes[0].set_ylim(0.0, 1.05)
+    axes[0].set_ylabel("指标")
+    axes[0].set_title("三种特征集的分类效果")
+    axes[0].legend(fontsize=8)
+
+    axes[1].bar(positions, comparison["train_seconds"], color="#ff7f0e")
+    axes[1].set_xticks(positions)
+    axes[1].set_xticklabels([f"{dim} 维" for dim in comparison["dimension"]], fontsize=8)
+    axes[1].set_ylabel("训练耗时 / s")
+    axes[1].set_title("训练耗时对比")
+    for index, value in enumerate(comparison["train_seconds"]):
+        axes[1].annotate(f"{value:.2f}s", (index, value), ha="center", va="bottom", fontsize=8)
+    return _save(fig, out_path)
+
+
+def plot_advanced_confusion(
+    confusion: np.ndarray,
+    classes: Sequence[str],
+    out_path: str | Path,
+) -> Path:
+    """混淆矩阵热力图（含数值标注）。"""
+    matrix = np.asarray(confusion, dtype=float)
+    fig, axis = plt.subplots(figsize=(5.6, 5.0))
+    image = axis.imshow(matrix, cmap="Blues")
+    axis.set_xticks(np.arange(len(classes)))
+    axis.set_yticks(np.arange(len(classes)))
+    axis.set_xticklabels(classes, rotation=45, ha="right")
+    axis.set_yticklabels(classes)
+    axis.set_xlabel("预测")
+    axis.set_ylabel("真值")
+    axis.set_title("混淆矩阵（TSFresh top-k 轻量模型）")
+    threshold = matrix.max() / 2.0 if matrix.size else 0.0
+    for row in range(matrix.shape[0]):
+        for column in range(matrix.shape[1]):
+            value = matrix[row, column]
+            axis.text(
+                column,
+                row,
+                f"{int(value)}",
+                ha="center",
+                va="center",
+                fontsize=9,
+                color="white" if value > threshold else "black",
+            )
+    fig.colorbar(image, ax=axis, shrink=0.85)
+    return _save(fig, out_path)
+
+
+def plot_advanced_shap(importance: pd.Series, out_path: str | Path) -> Path:
+    """SHAP 平均绝对贡献 top-k 条形图。"""
+    ordered = importance.sort_values()
+    fig, axis = plt.subplots(figsize=(9, max(3.5, 0.32 * len(ordered))))
+    axis.barh(
+        [name.replace("__", "｜") for name in ordered.index],
+        ordered.to_numpy(dtype=float),
+        color="#2ca02c",
+    )
+    axis.set_xlabel("SHAP 平均绝对贡献")
+    axis.set_title(f"自动特征 top-{len(ordered)}（按 SHAP 排序）")
+    axis.tick_params(axis="y", labelsize=8)
+    return _save(fig, out_path)

@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Callable, Iterable, Sequence
+from typing import Callable, Iterable, Mapping, Sequence
 
 import numpy as np
 import pandas as pd
@@ -262,29 +262,36 @@ _START_PREFIXES: tuple[str, ...] = ("开始", "进入")
 _END_PREFIXES: tuple[str, ...] = ("结束", "离开")
 
 
-def normalize_event_label(label: str) -> tuple[str, str]:
+def normalize_event_label(
+    label: str,
+    aliases: Mapping[str, str] | None = None,
+) -> tuple[str, str]:
     """把原始打点标签归一化成 (状态名, 事件类型)。
 
     事件类型 `kind` 取 `start` / `end`。这样 `开始步行` / `结束步行` 会归一到
     同一个状态 `步行`，而不是被当成两个不同的状态。
+
+    `aliases` 可覆盖默认别名字典，例如把 `上楼梯` / `下楼梯` 保留成两个独立状态。
     """
+    table = STATE_ALIASES if aliases is None else aliases
     text = (label or "").strip()
     if not text:
         return "unknown", "start"
     for prefix in _END_PREFIXES:
         if text.startswith(prefix) and len(text) > len(prefix):
             name = text[len(prefix):]
-            return STATE_ALIASES.get(name, name), "end"
+            return table.get(name, name), "end"
     for prefix in _START_PREFIXES:
         if text.startswith(prefix) and len(text) > len(prefix):
             name = text[len(prefix):]
-            return STATE_ALIASES.get(name, name), "start"
-    return STATE_ALIASES.get(text, text), "start"
+            return table.get(name, name), "start"
+    return table.get(text, text), "start"
 
 
 def build_state_intervals(
     events: Iterable[tuple[float, str, str]],
     duration_seconds: float,
+    aliases: Mapping[str, str] | None = None,
 ) -> list[tuple[str, float, float]]:
     """把打点事件转成 (状态, 起始秒, 结束秒) 的非重叠区间序列。
 
@@ -302,7 +309,7 @@ def build_state_intervals(
     changes: list[tuple[float, str]] = []
     current = "unknown"
     for timestamp, label, _kind in ordered:
-        state, kind = normalize_event_label(label)
+        state, kind = normalize_event_label(label, aliases)
         moment = float(timestamp)
         if kind == "end":
             if current != state:
@@ -334,9 +341,10 @@ def build_state_intervals(
 def make_state_lookup(
     events: Iterable[tuple[float, str, str]],
     duration_seconds: float,
+    aliases: Mapping[str, str] | None = None,
 ) -> Callable[[float], str]:
     """根据事件标签生成 时间 -> 状态 的函数（规则见 `build_state_intervals`）。"""
-    intervals = build_state_intervals(events, duration_seconds)
+    intervals = build_state_intervals(events, duration_seconds, aliases)
 
     def lookup(time_seconds: float) -> str:
         if not intervals:

@@ -35,5 +35,8 @@ analysis/.venv/
 analysis_outputs/**/*.tmp
 analysis_outputs/**/spectrum_cache*/
 
+# --- TSFresh 全特征矩阵缓存（约 14 MB，可用 --reuse-features 直接复用，不入库） ---
+analysis_outputs/**/advanced*/advanced_tsfresh_features.csv.gz
+
 # --- 重复的原始会话目录（与 data/task3/raw 内容一致，避免重复提交） ---
 data/手持十分钟匀速/
