@@ -175,6 +175,9 @@ def run_bus_experiment(
     features: pd.DataFrame | None = None,
     state_groups: dict[str, tuple[str, ...]] | None = None,
     walking_states: tuple[str, ...] = ("步行",),
+    vehicle_features: pd.DataFrame | None = None,
+    vehicle_label: str = "真实乘车",
+    vehicle_source: str = "",
 ) -> dict[str, object]:
     out = Path(out_dir)
     (out / "figures").mkdir(parents=True, exist_ok=True)
@@ -233,9 +236,39 @@ def run_bus_experiment(
         float(np.mean(bus_var_pred)) if bus_var.size else None
     )
 
+    plot_extras: list[tuple[str, np.ndarray, np.ndarray]] = []
+
+    # 真实乘车（本实验用真实地铁行驶段）作为首选负样本，替代仿真车辆振动参考。
+    real_vehicle: dict[str, object] | None = None
+    if vehicle_features is not None and not vehicle_features.empty:
+        vehicle_ratio, vehicle_cv = _clean_pair(
+            vehicle_features["step_band_energy_ratio"].to_numpy(dtype=float),
+            vehicle_features["interval_cv"].to_numpy(dtype=float),
+        )
+        if vehicle_ratio.size:
+            vehicle_pred = classify(vehicle_ratio, vehicle_cv)
+            vehicle_var = _clean(
+                vehicle_features["acc_mag_var"].to_numpy(dtype=float)
+            )
+            real_vehicle = {
+                "label": vehicle_label,
+                "source": vehicle_source,
+                "window_count": int(vehicle_ratio.size),
+                "ratio_median": float(np.median(vehicle_ratio)),
+                "ratio_mean": float(np.mean(vehicle_ratio)),
+                "cv_mean": float(np.mean(vehicle_cv)),
+                "classified_walking_ratio": float(np.mean(vehicle_pred)),
+                "variance_median": float(np.median(vehicle_var)) if vehicle_var.size else None,
+                "variance_classified_walking_ratio": (
+                    float(np.mean(vehicle_var >= var_threshold))
+                    if vehicle_var.size and var_threshold
+                    else None
+                ),
+            }
+            plot_extras.append((vehicle_label, vehicle_ratio, vehicle_cv))
+
     # 真实打点状态的分组统计：骑行等非步行段是这两个特征的真实失效边界。
     real_groups: dict[str, dict[str, object]] = {}
-    plot_extras: list[tuple[str, np.ndarray, np.ndarray]] = []
     for name, states in (state_groups or DEFAULT_STATE_GROUPS).items():
         group_ratio, group_cv = state_group_pairs(features, states) if features is not None else (
             np.empty(0),
@@ -316,6 +349,7 @@ def run_bus_experiment(
             "bus_classified_walking_ratio": variance_only_false_positive,
             "note": "车辆整体振动会让方差同样很大，只看方差会把大量乘车窗口误判为步行。",
         },
+        "real_vehicle": real_vehicle,
         "real_state_groups": real_groups,
         "gait_vs_vehicle_figure": str(gait_vehicle_figure) if gait_vehicle_figure else None,
         "figure": str(figure),

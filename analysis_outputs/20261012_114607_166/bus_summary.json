@@ -28,6 +28,17 @@
     "bus_classified_walking_ratio": 0.41025641025641024,
     "note": "车辆整体振动会让方差同样很大，只看方差会把大量乘车窗口误判为步行。"
   },
+  "real_vehicle": {
+    "label": "地铁",
+    "source": "data\\20261013_215849_016地铁测试",
+    "window_count": 304,
+    "ratio_median": 0.17226767415994285,
+    "ratio_mean": 0.2129218779500843,
+    "cv_mean": 0.2203592307924104,
+    "classified_walking_ratio": 0.07236842105263158,
+    "variance_median": 0.15610066956637256,
+    "variance_classified_walking_ratio": 0.0
+  },
   "real_state_groups": {
     "步行": {
       "states": [

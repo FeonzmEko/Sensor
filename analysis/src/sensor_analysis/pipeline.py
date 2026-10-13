@@ -97,12 +97,39 @@ def _format_bytes(size: int) -> str:
     return f"{size:,} bytes"
 
 
+def _session_feature_table(
+    session_dir: str | Path,
+    spec: WindowSpec,
+    band: tuple[float, float],
+    states: tuple[str, ...] | None = None,
+) -> tuple[SensorSession, pd.DataFrame]:
+    """读取另一个会话，并按需要筛选状态后生成逐窗口特征表（内存中计算，不落盘）。"""
+    source = load_session(session_dir)
+    lookup, _ = resolve_state_lookup(source)
+    windows = build_windows(
+        source.accelerometer, spec, session_id=source.session_id, state_lookup=lookup
+    )
+    if states:
+        windows = windows[windows["state"].isin(states)].reset_index(drop=True)
+    time_features = build_time_feature_table(source.accelerometer, windows, band=band)
+    frequency_features = build_frequency_feature_table(source.accelerometer, windows, band=band)
+    merged = time_features.merge(
+        frequency_features.drop(columns=["session_id", "start_seconds", "end_seconds", "state"]),
+        on="window_id",
+        how="left",
+    )
+    return source, merged
+
+
 def run_pipeline(
     session_dir: str | Path,
     out_dir: str | Path | None = None,
     window_seconds: float = 4.0,
     step_seconds: float = 2.0,
     band: tuple[float, float] = (0.5, 3.0),
+    vehicle_session: str | Path | None = None,
+    vehicle_states: tuple[str, ...] = ("上地铁",),
+    vehicle_label: str = "地铁",
 ) -> Path:
     session = load_session(session_dir)
     output = Path(out_dir) if out_dir else Path("analysis_outputs") / session.session_id
@@ -200,12 +227,22 @@ def run_pipeline(
     # 7) D06 / D07 / 公交防误计步
     d06 = run_d06_experiment(session, output)
     d07 = run_alias_experiment(output)
+    vehicle_features = None
+    vehicle_source = ""
+    if vehicle_session is not None:
+        _, vehicle_features = _session_feature_table(
+            vehicle_session, spec, band, states=vehicle_states
+        )
+        vehicle_source = str(vehicle_session)
     bus = run_bus_experiment(
         session,
         output,
         window_seconds=window_seconds,
         step_seconds=step_seconds,
         features=merged,
+        vehicle_features=vehicle_features,
+        vehicle_label=vehicle_label,
+        vehicle_source=vehicle_source,
     )
 
     # 8) 报告
@@ -400,39 +437,79 @@ def _build_report(
         "标准奈奎斯特折叠值为 `0.8 Hz`，两种写法都能说明“高频被低采样率折返”。"
     )
     lines.append("")
-    lines.append("## 8. 作业②：公交防误计步")
+    lines.append("## 8. 作业②：防「坐车也计步」")
     lines.append("")
     walk = bus["walking"]
     busy = bus["bus"]
     variance_baseline = bus["variance_only_baseline"]
+    real_vehicle = bus.get("real_vehicle")
+    if real_vehicle:
+        vehicle_ratio_text = (
+            f"真实{real_vehicle['label']}行驶段中位数 **{real_vehicle['ratio_median']:.3f}**"
+        )
+        vehicle_cv_text = f"真实{real_vehicle['label']}行驶段均值 **{real_vehicle['cv_mean']:.3f}**"
+    else:
+        vehicle_ratio_text = f"仿真车辆振动参考中位数 {busy['ratio_median']:.3f}"
+        vehicle_cv_text = f"仿真车辆振动参考均值 {busy['cv_mean']:.3f}"
     lines.append(
-        f"- 特征 1：步频带能量占比 `R = P(0.5~3 Hz) / P(0.5~10 Hz)`；"
-        f"步行段中位数 {walk['ratio_median']:.3f}，仿真车辆振动参考中位数 {busy['ratio_median']:.3f}。"
+        "- 特征 1：步频带能量占比 `R = P(0.5~3 Hz) / P(0.5~10 Hz)`；"
+        f"步行段中位数 **{walk['ratio_median']:.3f}**，{vehicle_ratio_text}。"
     )
     lines.append(
-        f"- 特征 2：峰间隔变异系数 `CV = std(步间隔) / mean(步间隔)`；"
-        f"步行段均值 {walk['cv_mean']:.3f}，仿真车辆振动参考均值 {busy['cv_mean']:.3f}。"
+        "- 特征 2：峰间隔变异系数 `CV = std(步间隔) / mean(步间隔)`；"
+        f"步行段均值 **{walk['cv_mean']:.3f}**，{vehicle_cv_text}。"
     )
     lines.append(
-        f"- 阈值思路：`R ≥ {bus['thresholds']['step_band_energy_ratio']}` 且 "
+        f"- 判据：`R ≥ {bus['thresholds']['step_band_energy_ratio']}` 且 "
         f"`CV ≤ {bus['thresholds']['peak_interval_cv']}` 判为步行。"
     )
     lines.append(
-        f"- 双特征判定：真实步行段（{walk['window_count']} 窗，来自本会话打点标签）被判为步行的比例 "
-        f"{walk['classified_walking_ratio']:.2%}；仿真车辆振动参考被判为步行的比例 "
-        f"{busy['classified_walking_ratio']:.2%}。"
+        f"- 正样本：本会话真实打点的步行段（{walk['window_count']} 窗），"
+        f"被判为步行的比例 **{walk['classified_walking_ratio']:.2%}**。"
     )
-    lines.append(
-        f"- 只用方差的对照基线（阈值取步行与乘车方差中位数的中点，"
-        f"`{variance_baseline['threshold_m_s2_squared']:.2f} m²/s⁴`）："
-        f"真实步行窗口只有 {variance_baseline['walking_classified_walking_ratio']:.2%} 被判为步行，"
-        f"而仿真乘车窗口有 {variance_baseline['bus_classified_walking_ratio']:.2%} 被判为步行"
-        "——方差既漏掉大量真实步行，又把乘车整体误判，双向都不可用。"
-    )
+
+    if real_vehicle:
+        lines.append("")
+        lines.append(f"### 8.1 真实乘车验证：{real_vehicle['label']}行驶段")
+        lines.append("")
+        lines.append(
+            f"- 数据来源：`{real_vehicle['source']}`，取真实打点的{real_vehicle['label']}行驶区间"
+            f"（上车 → 下车），实测 **{real_vehicle['window_count']} 个纯窗口**。"
+        )
+        lines.append(
+            f"- 特征分布：`R` 中位数 **{real_vehicle['ratio_median']:.3f}**（均值 "
+            f"{real_vehicle['ratio_mean']:.3f}），`CV` 均值 **{real_vehicle['cv_mean']:.3f}**；"
+            f"方差中位数 {real_vehicle['variance_median']:.3f} m²/s⁴。"
+        )
+        lines.append(
+            f"- 判定结果：被判为步行的比例 **{real_vehicle['classified_walking_ratio']:.2%}**，"
+            f"即 **{1 - real_vehicle['classified_walking_ratio']:.2%} 被正确排除**。"
+        )
+        vehicle_variance_ratio = real_vehicle.get("variance_classified_walking_ratio")
+        if vehicle_variance_ratio is not None:
+            if vehicle_variance_ratio > 0.5:
+                lines.append(
+                    f"- 只用方差的对照基线：{real_vehicle['label']}窗口被判为步行的比例高达 "
+                    f"{vehicle_variance_ratio:.2%}，说明“抖动大就算走路”在这一类上会整体误判。"
+                )
+            else:
+                lines.append(
+                    f"- 只用方差的对照基线：{real_vehicle['label']}窗口被判为步行的比例 "
+                    f"{vehicle_variance_ratio:.2%}——地铁振动平缓，方差本就远低于步行，"
+                    "所以“只用方差”恰好在**这一类**上也能工作；让方差法失效的是整体振动更大的"
+                    "交通工具（见 8.3）与骑行（峰值比步行还高，见 8.2）。"
+                )
+        lines.append(
+            f"- 结论：以真实{real_vehicle['label']}行驶段作首选负样本，`R + CV` 双特征依然有效；"
+            "仿真车辆振动信号降级为理想化对照。"
+        )
+
     real_groups = bus.get("real_state_groups") or {}
     if real_groups:
         lines.append("")
-        lines.append("| 真实状态分组 | 窗口数 | R 中位数 | CV 均值 | 判为步行的比例 | 方差中位数 | 只按方差判为步行的比例 |")
+        lines.append("### 8.2 同一会话内的分状态验证")
+        lines.append("")
+        lines.append("| 状态分组 | 窗口数 | R 中位数 | CV 均值 | 判为步行的比例 | 方差中位数 | 只按方差判为步行的比例 |")
         lines.append("|---|---:|---:|---:|---:|---:|---:|")
         for name, group in real_groups.items():
             variance_ratio = group.get("variance_classified_walking_ratio")
@@ -447,19 +524,18 @@ def _build_report(
         if bike is not None:
             bike_ratio = bike["classified_walking_ratio"] or 0.0
             lines.append(
-                f"- 骑行段实测（真实打点，{bike['window_count']} 窗）：R 中位数 "
-                f"{bike['ratio_median']:.3f}、CV 均值 {bike['cv_mean']:.3f}，"
-                f"被判为步行的比例 {bike_ratio:.2%}。"
+                f"- 骑行段（真实打点，{bike['window_count']} 窗）：R 中位数 {bike['ratio_median']:.3f}、"
+                f"CV 均值 {bike['cv_mean']:.3f}，被判为步行的比例 {bike_ratio:.2%}。"
             )
             if bike_ratio <= 0.5:
                 lines.append(
-                    "- 因此双特征把真实骑行段正确排除：骑车振动的能量主要落在 3 Hz 以上的路面/车架"
-                    "颠簸，被 `R` 的分母（0.5~10 Hz 总能量）拉低，`R` 远低于步行段。"
+                    "- 双特征把骑行段正确排除：骑车振动能量主要落在 3 Hz 以上的路面/车架颠簸，"
+                    "被 `R` 的分母（0.5~10 Hz 总能量）拉低，`R` 远低于步行段。"
                 )
             else:
                 lines.append(
-                    "- 这是本判据的失效边界：骑车振动的低频谱峰与步频带重叠，双特征仍会判为步行，"
-                    "需要再引入第三个特征（例如 ZCR / GPS 车速 / 步数与位移一致性）才能覆盖。"
+                    "- 这是判据的失效边界：骑车振动的低频谱峰与步频带重叠，"
+                    "需要第三个特征（ZCR / GPS 车速 / 步数与位移一致性）才能覆盖。"
                 )
         stat_rows = {}
         if state_summary is not None and not state_summary.empty:
@@ -473,24 +549,50 @@ def _build_report(
                 f"{walk_row.acc_mag_peak_dynamic_median:.2f} m/s² 还高——峰值大不等于在走路。"
             )
             lines.append(
-                f"- 真正拉开差距的是节奏与频带分布：骑行段 ZCR 中位数 "
+                f"- 真正拉开差距的是频带分布与节奏：骑行段 ZCR 中位数 "
                 f"{bike_row.acc_mag_zcr_median:.2f} 次/秒，是步行段 "
                 f"{walk_row.acc_mag_zcr_median:.2f} 次/秒的 "
-                f"{bike_row.acc_mag_zcr_median / walk_row.acc_mag_zcr_median:.1f} 倍，"
-                "说明车辆类振动的高频成分远多于人体步态。"
+                f"{bike_row.acc_mag_zcr_median / walk_row.acc_mag_zcr_median:.1f} 倍。"
             )
-    if bus.get("gait_vs_vehicle_figure"):
-        lines.append(
-            "- 时域 / 频域并排对照见 `figures/walk_vs_bike_spectrum.png`："
-            "上图两段的合矢量幅度同量级，下图显示步行能量集中在 2 Hz 附近，"
-            "而骑行能量铺开到 3 Hz 以上——这就是 `R` 能拉开差距的物理原因。"
-        )
-    lines.append("- 结论：必须结合步频带能量占比与节奏规律性，才能抑制公交误计步。")
+        if bus.get("gait_vs_vehicle_figure"):
+            lines.append(
+                "- 时域 / 频域并排对照见 `figures/walk_vs_bike_spectrum.png`："
+                "两段合矢量幅度同量级，但步行能量集中在 2 Hz 附近、骑行能量铺开到 3 Hz 以上。"
+            )
+
+    lines.append("")
+    lines.append("### 8.3 为什么不能只看“加速度大 / 方差大”")
+    lines.append("")
     lines.append(
-        "- 注意：车辆振动仍使用仿真参考信号；本次会话采集的是步行 / 楼梯 / 电梯 / 骑行，"
-        "没有真实乘车段，故“防公交误计步”的阈值仍需在含真实乘车段的会话上复标。"
+        f"- 只用方差的对照基线（阈值取步行与车辆振动方差中位数的中点，"
+        f"`{variance_baseline['threshold_m_s2_squared']:.2f} m²/s⁴`）："
+        f"真实步行窗口只有 **{variance_baseline['walking_classified_walking_ratio']:.2%}** 被判为步行，"
+        f"而仿真乘车窗口有 **{variance_baseline['bus_classified_walking_ratio']:.2%}** 被判为步行"
+        "——方差既漏掉近一半真实步行，又把车辆整体振动误判成走路，双向都不可用。"
+    )
+    lines.append(
+        "- 更直观的例子是骑行段：动态峰值 11.09 m/s² > 步行段 8.50 m/s²，"
+        "“动得更大”反而发生在不该计步的活动上。"
     )
     lines.append("")
+    lines.append("### 8.4 结论与局限")
+    lines.append("")
+    lines.append(
+        "- 结论：`R`（步频带能量占比）负责“能量在不在步频带里”，"
+        "`CV`（峰间隔变异系数）负责“节奏稳不稳”，两者结合才能既保住步行、又压住乘车。"
+    )
+    if real_vehicle:
+        lines.append(
+            f"- 本次已用**真实{real_vehicle['label']}**行驶段（{real_vehicle['window_count']} 窗）"
+            "替代仿真参考信号完成验证；同类活动里最容易失效的是骑行段（见 8.2）。"
+        )
+    lines.append(
+        "- 局限：`CV` 在几乎没有周期性结构的段（如电梯、静止）会因找不到足够峰而退化，"
+        "此时判据实际只由 `R` 决定；真实乘车样本仅来自一条地铁线路，"
+        "不同车型/线路的振动谱可能不同，阈值仍建议按线路复标。"
+    )
+    lines.append("")
+
     lines.append("## 9. 输出文件")
     lines.append("")
     for name in (
@@ -546,6 +648,18 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--step", type=float, default=2.0, help="步进（秒）")
     parser.add_argument("--band-low", type=float, default=0.5, help="步频带下限（Hz）")
     parser.add_argument("--band-high", type=float, default=3.0, help="步频带上限（Hz）")
+    parser.add_argument(
+        "--vehicle-session",
+        default=None,
+        help="真实乘车会话目录（用作作业②的首选负样本，替代仿真车辆振动参考）",
+    )
+    parser.add_argument(
+        "--vehicle-state",
+        action="append",
+        default=None,
+        help="该会话中代表乘车的状态标签，可重复传入（默认：上地铁）",
+    )
+    parser.add_argument("--vehicle-label", default="地铁", help="真实乘车工具的展示名（默认：地铁）")
     args = parser.parse_args(argv)
 
     output = run_pipeline(
@@ -554,6 +668,9 @@ def main(argv: list[str] | None = None) -> int:
         window_seconds=args.window,
         step_seconds=args.step,
         band=(args.band_low, args.band_high),
+        vehicle_session=args.vehicle_session,
+        vehicle_states=tuple(args.vehicle_state or ("上地铁",)),
+        vehicle_label=args.vehicle_label,
     )
     print(f"分析完成：{output}")
     return 0

@@ -1,0 +1,280 @@
+{
+  "directory": "D:\\code\\Sensor\\data\\20261013_215849_016地铁测试",
+  "session_id": "20261013_215849_016",
+  "files": {
+    "accelerometer.csv": {
+      "size_bytes": 5524772,
+      "sha256": "E4CF38AC26F612E8A62A11734569BE26937A72F1F34D2B3311DC3BA2BA5B87A6"
+    },
+    "gyroscope.csv": {
+      "size_bytes": 2504744,
+      "sha256": "E21480A796E4A3A4E8F57ED5EF827D429FD1DD282CF292EAE5054B2A7AA77A10"
+    },
+    "metadata.json": {
+      "size_bytes": 2182,
+      "sha256": "2339FEF7FC13438DD90090968351284097FF269B4CA23FCA70EDBD0FBFCC0215"
+    },
+    "labels.csv": {
+      "size_bytes": 246,
+      "sha256": "2E38FE69A4D6799F3826676CC967B3F57B0FEBB78D4EB4CC4B8A0E46208CD757"
+    }
+  },
+  "sensors": {
+    "accelerometer": {
+      "header_ok": true,
+      "header": [
+        "timestamp_ns",
+        "x_m_s2",
+        "y_m_s2",
+        "z_m_s2"
+      ],
+      "sample_count": 118458,
+      "first_timestamp_ns": 975705255467809,
+      "last_timestamp_ns": 976734864580181,
+      "duration_seconds": 1029.609112372,
+      "measured_hz": 115.05045805888442,
+      "strictly_monotonic": true,
+      "duplicate_count": 0,
+      "regression_count": 0,
+      "gaps_over_2x_median": 0,
+      "gaps_over_3x_median": 0,
+      "gaps_over_100ms": 0,
+      "vector_mean": 9.830346896618472,
+      "vector_stddev": 0.5696722648444605,
+      "vector_min": 4.268887452068453,
+      "vector_max": 19.530211907189774,
+      "vector_p01": 8.185461964007263,
+      "vector_p99": 11.600751015380675,
+      "axes": {
+        "x": {
+          "mean": -0.2021018874523013,
+          "stddev": 0.541633676319857,
+          "min": -6.1842504,
+          "max": 7.170093
+        },
+        "y": {
+          "mean": 1.3791108490919832,
+          "stddev": 0.8574348088075547,
+          "min": -4.2370906,
+          "max": 6.0711894
+        },
+        "z": {
+          "mean": 9.676124562948049,
+          "stddev": 0.6012542239596224,
+          "min": 4.1814575,
+          "max": 19.16292
+        }
+      },
+      "first_row": [
+        975705255467809.0,
+        -0.96789676,
+        2.417349,
+        10.469795
+      ],
+      "last_row": [
+        976734864580181.0,
+        -3.9517467,
+        0.8955139,
+        9.869197
+      ],
+      "interval_us_min": 8690.729,
+      "interval_us_median": 8691.719,
+      "interval_us_p95": 8692.812,
+      "interval_us_p99": 8692.865,
+      "interval_us_max": 8693.854,
+      "unit_check": {
+        "expect": "m/s^2，静止合矢量接近 9.81",
+        "vector_mean": 9.830346896618472,
+        "static_like": true,
+        "max_range_observed": 19.16292,
+        "saturation_risk": false
+      }
+    },
+    "gyroscope": {
+      "header_ok": true,
+      "header": [
+        "timestamp_ns",
+        "x_rad_s",
+        "y_rad_s",
+        "z_rad_s"
+      ],
+      "sample_count": 47384,
+      "first_timestamp_ns": 975705261482132,
+      "last_timestamp_ns": 976734874942993,
+      "duration_seconds": 1029.613460861,
+      "measured_hz": 46.02018310869462,
+      "strictly_monotonic": true,
+      "duplicate_count": 0,
+      "regression_count": 0,
+      "gaps_over_2x_median": 0,
+      "gaps_over_3x_median": 0,
+      "gaps_over_100ms": 0,
+      "vector_mean": 0.1088255848049336,
+      "vector_stddev": 0.1793413448553263,
+      "vector_min": 0.0006656744828415463,
+      "vector_max": 2.6715083948310414,
+      "vector_p01": 0.0075946942885617265,
+      "vector_p99": 0.9653032315169412,
+      "axes": {
+        "x": {
+          "mean": -0.00022443647508483874,
+          "stddev": 0.117906568675944,
+          "min": -1.8183917,
+          "max": 1.7458515
+        },
+        "y": {
+          "mean": -0.00038286051041237545,
+          "stddev": 0.10162960727059492,
+          "min": -1.9605705,
+          "max": 2.1507022
+        },
+        "z": {
+          "mean": 0.004690266835357504,
+          "stddev": 0.14054748064214376,
+          "min": -2.0408993,
+          "max": 2.5728097
+        }
+      },
+      "first_row": [
+        975705261482132.0,
+        -0.3176497,
+        -0.02443459,
+        0.8045089
+      ],
+      "last_row": [
+        976734874942993.0,
+        -0.2771799,
+        -0.20769402,
+        0.6852376
+      ],
+      "interval_us_min": 21727.76,
+      "interval_us_median": 21729.322,
+      "interval_us_p95": 21731.979,
+      "interval_us_p99": 21732.239,
+      "interval_us_max": 21732.917,
+      "unit_check": {
+        "expect": "rad/s，静止接近 0",
+        "vector_mean": 0.1088255848049336,
+        "vector_p99": 0.9653032315169412,
+        "max_range_observed": 2.5728097,
+        "saturation_risk": false
+      }
+    }
+  },
+  "labels": {
+    "count": 5,
+    "file": "labels.csv",
+    "max_offset_ms": 3.9650400000255104,
+    "events": [
+      {
+        "label": "上地铁",
+        "relative_seconds": 1.283567432,
+        "nearest_accel_index": 148,
+        "nearest_accel_seconds": 1.286352136,
+        "offset_ms": 2.7847040000001932
+      },
+      {
+        "label": "下地铁",
+        "relative_seconds": 292.981702008,
+        "nearest_accel_index": 33709,
+        "nearest_accel_seconds": 292.977736968,
+        "offset_ms": 3.9650400000255104
+      },
+      {
+        "label": "等地铁",
+        "relative_seconds": 320.856464914,
+        "nearest_accel_index": 36917,
+        "nearest_accel_seconds": 320.859158768,
+        "offset_ms": 2.693853999971907
+      },
+      {
+        "label": "上地铁",
+        "relative_seconds": 710.253360442,
+        "nearest_accel_index": 81718,
+        "nearest_accel_seconds": 710.255371965,
+        "offset_ms": 2.0115229999646544
+      },
+      {
+        "label": "下地铁",
+        "relative_seconds": 1028.310431102,
+        "nearest_accel_index": 118308,
+        "nearest_accel_seconds": 1028.313866695,
+        "offset_ms": 3.435592999949222
+      }
+    ]
+  },
+  "metadata": {
+    "schema_version": 2,
+    "session_id": "20261013_215849_016",
+    "status": "completed",
+    "stop_reason": "用户手动停止",
+    "experiment": "lesson2-feature-engineering",
+    "app_version": "1.0",
+    "route_name": "坐地铁",
+    "device_placement": "手持",
+    "orientation": "屏幕朝上平放",
+    "target_duration_seconds": 240,
+    "note": "",
+    "started_at": "2026-10-13 21:58:49.018 +0800",
+    "ended_at": "2026-10-13 22:15:58.649 +0800",
+    "started_elapsed_realtime_ns": 975705263703054,
+    "ended_elapsed_realtime_ns": 976734894983130,
+    "sample_clock": "SensorEvent.timestamp, nanoseconds, same boot-time clock for both sensors",
+    "coordinate_system": "Android device body frame X/Y/Z",
+    "device": {
+      "manufacturer": "Xiaomi",
+      "model": "25019PNF3C",
+      "device": "xuanyuan",
+      "android_release": "17",
+      "android_sdk": 37
+    },
+    "sensors": {
+      "accelerometer": {
+        "name": "lsm6dsv Accelerometer Non-wakeup",
+        "vendor": "STMicro",
+        "version": 28676,
+        "type": 1,
+        "max_range": 156.9064,
+        "resolution": 0.0047856453,
+        "min_delay_us": 5000,
+        "reporting_mode": 0
+      },
+      "gyroscope": {
+        "name": "lsm6dsv Gyroscope Non-wakeup",
+        "vendor": "STMicro",
+        "version": 28676,
+        "type": 4,
+        "max_range": 34.906036,
+        "resolution": 0.0012217296,
+        "min_delay_us": 5000,
+        "reporting_mode": 0
+      }
+    },
+    "samples": {
+      "accelerometer": {
+        "unit": "m/s^2",
+        "sample_count": 118458,
+        "first_timestamp_ns": 975705255467809,
+        "last_timestamp_ns": 976734864580181,
+        "duration_seconds": 1029.609112372,
+        "measured_hz": 115.05045805888442
+      },
+      "gyroscope": {
+        "unit": "rad/s",
+        "sample_count": 47384,
+        "first_timestamp_ns": 975705261482132,
+        "last_timestamp_ns": 976734874942993,
+        "duration_seconds": 1029.613460861,
+        "measured_hz": 46.02018310869462
+      }
+    },
+    "labels": {
+      "file": "labels.csv",
+      "header": "timestamp_elapsed_ns,wall_time_epoch_ms,label",
+      "count": 5,
+      "clock": "timestamp_elapsed_ns uses SystemClock.elapsedRealtimeNanos(), the same boot-time clock as SensorEvent.timestamp"
+    },
+    "error": null
+  },
+  "overall_pass": true
+}

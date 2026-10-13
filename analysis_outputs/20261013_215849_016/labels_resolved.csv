@@ -1,0 +1,12 @@
+﻿record_type,state,start_seconds,end_seconds,start_elapsed_ns,end_elapsed_ns,source
+raw_event,上地铁,1.283567432,1.283567432,,,labels.csv
+raw_event,下地铁,292.981702008,292.981702008,,,labels.csv
+raw_event,等地铁,320.856464914,320.856464914,,,labels.csv
+raw_event,上地铁,710.253360442,710.253360442,,,labels.csv
+raw_event,下地铁,1028.310431102,1028.310431102,,,labels.csv
+inferred_interval,unknown,0.0,1.283567432,975705255467809,975706539035241,unknown
+inferred_interval,上地铁,1.283567432,292.981702008,975706539035241,975998237169817,inferred_between_events
+inferred_interval,下地铁,292.981702008,320.856464914,975998237169817,976026111932723,inferred_between_events
+inferred_interval,等地铁,320.856464914,710.253360442,976026111932723,976415508828251,inferred_between_events
+inferred_interval,上地铁,710.253360442,1028.310431102,976415508828251,976733565898911,inferred_between_events
+inferred_interval,下地铁,1028.310431102,1029.613460861,976733565898911,976734868928670,inferred_between_events

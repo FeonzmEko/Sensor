@@ -80,6 +80,14 @@ PC 端 Python 工程负责**质量检查、滑窗、时域特征、频域特征�
 5. 全程保持页面在前台、不熄屏、不切换应用，关键状态用“打点”按钮记录；
 6. 停止后检查 `accelerometer.csv`、`gyroscope.csv`、`metadata.json`、`labels.csv` 是否完整。
 
+### 已采集会话
+
+| 会话 | 用途 | 时长 | 关键打点 |
+|---|---|---|---|
+| `data/20261012_114607_166_20分钟楼梯步行电梯骑行` | 主数据（步行 / 楼梯 / 电梯 / 静止 / 骑行） | 1271.4 s | 14 个 |
+| `data/20261013_101754_033手持静止三分钟/20261013_101754_033` | 静止类补充（进阶实验） | 181.4 s | 1 个 |
+| `data/20261013_215849_016地铁测试` | 作业②真实乘车负样本（两段地铁行驶 611 s） | 1029.6 s | 5 个（上车→下车→等地铁→上车→下车） |
+
 ---
 
 ## Python 分析工程
@@ -96,6 +104,12 @@ pytest                                 # 运行单元测试
 python -m sensor_analysis.pipeline \
     --session "data/20261012_114607_166_20分钟楼梯步行电梯骑行" \
     --out analysis_outputs/20261012_114607_166 --window 4 --step 2
+
+# 作业②：带上真实乘车会话，用它替换仿真车辆振动参考
+python -m sensor_analysis.pipeline \
+    --session "data/20261012_114607_166_20分钟楼梯步行电梯骑行" \
+    --out analysis_outputs/20261012_114607_166 --window 4 --step 2 \
+    --vehicle-session "data/20261013_215849_016地铁测试" --vehicle-state 上地铁 --vehicle-label 地铁
 
 # 早期调试样本（571.3 s 手持匀速步行）
 python -m sensor_analysis.pipeline --session data/task3/raw \
@@ -217,6 +231,7 @@ Gradle Version Catalog · Python（numpy / pandas / matplotlib / scipy / pytest�
 
 - [第 2 课时任务清单](docs/tasks2.md)
 - [21.2 分钟采集证据（图表 / 质量报告 / 特征汇总）](docs/evidence/lesson2-20min/)
+- [D06 / D07 课程页面实操截图](docs/evidence/d06-d07-pages/)
 - [工程代码刷新任务清单](docs/tasks-code-reflash.md)
 - [第 2 课时特征工程实验报告](docs/experiment2-report.md)
 - [进阶实验报告（TSFresh + XGBoost + SHAP）](docs/experiment2-advanced.md)
